@@ -81,7 +81,7 @@ public class NoPhaseGlow extends BaseHullMod {
         return getCompleteFilePathOfShipOverlay(ship, glow2Appendance);
     }
 
-    private static Sprite getOverridenSpriteForTexture(String texPath) {
+    private static Sprite getOverridenSpriteForTexture(String texPath, ShipAPI ship) {
         Sprite sprt = new Sprite(texPath) {
             //            @Override
             public void render(float x, float y) {
@@ -100,9 +100,13 @@ public class NoPhaseGlow extends BaseHullMod {
                     ).toArray(Color[]::new);
 
                     int texID = this.getTexture().ö00000();
+//                    float t = Global.getCombatEngine().getTotalElapsedTime(false);
+                    float t = ship.getFullTimeDeployed();
+                    // ShipAPI haves total time deployed, use that instead when you get to using per-ship shaders
+
                     shader.getUniformManager()
                             .setTexture("textureSampler", texID, GL13.GL_TEXTURE0)
-                            .setFloat("time", (System.currentTimeMillis() - startTime) / 1000.0f)  // seconds!
+                            .setFloat("time", t)  // seconds!
                             .setInt("armCount", 9)
                             .setFloat("speed", 0.25f)
 //                            .setFloat("thickness", 0.28f)
@@ -186,7 +190,7 @@ public class NoPhaseGlow extends BaseHullMod {
         if (diffuseSpriteHandle == null) UpdateSpriteHandles(ship);
         Sprite tmp;
 
-        Sprite customDiffuseSprite = getOverridenSpriteForTexture(getGlow1SpritePath(ship));
+        Sprite customDiffuseSprite = getOverridenSpriteForTexture(getGlow1SpritePath(ship), ship);
         tmp = (Sprite) diffuseSpriteHandle.get(((Ship) ship).getPhaseCloak());
 
         customDiffuseSprite.setCenter(tmp.getCenterX(), tmp.getCenterY());
@@ -194,7 +198,7 @@ public class NoPhaseGlow extends BaseHullMod {
         diffuseSpriteHandle.set(((Ship) ship).getPhaseCloak(), customDiffuseSprite);
 
 
-        Sprite customHighlightSprite = getOverridenSpriteForTexture(getGlow2SpritePath(ship));
+        Sprite customHighlightSprite = getOverridenSpriteForTexture(getGlow2SpritePath(ship), ship);
         tmp = (Sprite) highlightSpriteHandle.get(((Ship) ship).getPhaseCloak());
 
         customHighlightSprite.setCenter(tmp.getCenterX(), tmp.getCenterY());

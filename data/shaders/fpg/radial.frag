@@ -6,7 +6,7 @@ uniform int armCount;
 uniform float speed;
 // uniform float thickness;
 
-uniform vec3 colors[3];
+uniform vec3 colors[16];
 uniform int numColors;
 
 uniform float texWidth;
@@ -18,14 +18,18 @@ void main()
     vec2 coordinateOffset1 = vec2(0.5 * offset.x, 0.5 * offset.y);
     vec2 uv = (gl_TexCoord[0].st) - coordinateOffset1;
     vec4 texColor = texture2D(textureSampler, gl_TexCoord[0].st);
+
     float radius = length(uv);
     float angle = atan(uv.y, uv.x);
 
     angle += time * speed;
 
+    // === SPIRAL MASK ===
     // float spiral = sin(angle * float(armCount)) * 0.5 + 0.5;
     // spiral = smoothstep(0.5 - thickness, 0.5 + thickness, spiral);
 
+    // === COLOR CYCLING (this was the main bug) ===
+    // Use the angle directly for color, NOT the spiral value
     float colorIndex = mod(angle * float(armCount) / (3.14159 * 2.0), float(numColors));
     int idx1 = int(floor(colorIndex));
     int idx2 = idx1 + 1;

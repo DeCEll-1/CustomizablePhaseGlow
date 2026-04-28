@@ -207,9 +207,9 @@ public class ShaderUniformManager {
 
         floatArrayBuffer.clear();
         for (Color col : colors) {
-            floatArrayBuffer.put(col.getRed());
-            floatArrayBuffer.put(col.getGreen());
-            floatArrayBuffer.put(col.getBlue());
+            floatArrayBuffer.put(col.getRed() / 255f);
+            floatArrayBuffer.put(col.getGreen() / 255f);
+            floatArrayBuffer.put(col.getBlue() / 255f);
         }
         floatArrayBuffer.flip();
 
