@@ -1,24 +1,16 @@
 package DeCell.FPG.Frontend;
 
 import DeCell.FPG.Frontend.Backend.*;
+import DeCell.FPG.Frontend.Backend.Components.Charlie.CharlieElement;
+import DeCell.FPG.Frontend.Backend.Components.*;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
-import DeCell.FPG.Frontend.Backend.Components.MyButton;
-import DeCell.FPG.Frontend.Backend.Components.MyPanel;
-import DeCell.FPG.Frontend.Backend.Components.MyTooltip;
-import DeCell.FPG.Frontend.Backend.Components.OpenableButtonPanel;
 import DeCell.FPG.Frontend.Backend.Plugins.CPanelPlugin;
-import DeCell.FPG.Frontend.Backend.Plugins.LambdaUIPanelPlugin;
-import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
-import DeCell.FPG.Frontend.Backend.Renderable.BackgroundRenderable;
-import DeCell.FPG.Frontend.Backend.Renderable.BorderRenderable;
-import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
-import com.fs.starfarer.api.util.Misc;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -45,7 +37,9 @@ public class MainRefitPanelPlugin extends CPanelPlugin {
         MyButton panelOpeningButton = new MyButton("Modify Phase Effects", new Color(0xDDDDDD), new Color(0x444444), Alignment.MID, CutStyle.TL_BR, 190, 25, 0f, refitWindowOpenerTooltip)
                 .addTo(UIElements);
 
-        new OpenableButtonPanel(720, 640, panelOpeningButton, parent).inTL(210, 50).addTo(UIElements)
+        CharlieElement charlie = new CharlieElement(parent).addTo(UIElements);
+
+        new OpenableButtonPanel(720, 640, panelOpeningButton, charlie).inTL(210, 50).addTo(UIElements)
                 .setOnUIOpen((panel, internalData, _UIElements) ->
                 {
                     // evil

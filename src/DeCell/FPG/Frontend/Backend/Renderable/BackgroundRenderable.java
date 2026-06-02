@@ -11,6 +11,7 @@ import java.awt.*;
 
 public class BackgroundRenderable extends APluginRenderable {
     Color c;
+    public boolean render = true;
 
     public BackgroundRenderable(Color _c) {
         this.c = _c;
@@ -19,6 +20,8 @@ public class BackgroundRenderable extends APluginRenderable {
     @Override
     public void renderBelow(float alpha) {
         if (zone == null)
+            return;
+        if (!render)
             return;
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);

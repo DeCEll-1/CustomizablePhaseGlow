@@ -11,40 +11,60 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 public class MyPanel extends AUIElement<MyPanel, CustomPanelAPI> {
     CPanelPlugin plugin;
 
-    public MyPanel(float w, float h, CPanelPlugin p, MyPanel parent) {
+    //#region constructors
+    public MyPanel(float w, float h, CPanelPlugin p, MyPanel parent, boolean init) {
         super(parent.u.createCustomPanel(w, h, p));
         this.plugin = p;
-        initPlugin();
+        if (init) initPlugin();
         parent.addComponent(u);
+    }
+
+    public MyPanel(float w, float h, CPanelPlugin p, CustomPanelAPI parent, boolean init) {
+        super(parent.createCustomPanel(w, h, p));
+        this.plugin = p;
+        if (init) initPlugin();
+        parent.addComponent(u);
+    }
+
+    public MyPanel(float w, float h, CPanelPlugin p, UIPanelAPI parent, boolean init) {
+        super(Global.getSettings().createCustom(w, h, p));
+        this.plugin = p;
+        if (init) initPlugin();
+        parent.addComponent(u);
+    }
+
+    public MyPanel(float w, float h, CPanelPlugin p, boolean init) {
+        super(Global.getSettings().createCustom(w, h, p));
+        this.plugin = p;
+        if (init) initPlugin();
+    }
+
+    public MyPanel(float w, float h, CPanelPlugin p, MyPanel parent) {
+        this(w, h, p, parent, true);
     }
 
     public MyPanel(float w, float h, CPanelPlugin p, CustomPanelAPI parent) {
-        super(parent.createCustomPanel(w, h, p));
-        this.plugin = p;
-        initPlugin();
-        parent.addComponent(u);
+        this(w, h, p, parent, true);
     }
 
     public MyPanel(float w, float h, CPanelPlugin p, UIPanelAPI parent) {
-        super(Global.getSettings().createCustom(w, h, p));
-        this.plugin = p;
-        initPlugin();
-        parent.addComponent(u);
+        this(w, h, p, parent, true);
     }
 
     public MyPanel(float w, float h, CPanelPlugin p) {
-        super(Global.getSettings().createCustom(w, h, p));
-        this.plugin = p;
-        initPlugin();
+        this(w, h, p, true);
     }
+
+    //#endregion
 
     public MyPanel(CustomPanelAPI underlying) {
         super(underlying);
     }
 
-    private void initPlugin() {
+    public MyPanel initPlugin() {
         if (plugin != null)
             plugin.init(this.u);
+        return this;
     }
 
     @Override

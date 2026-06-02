@@ -35,10 +35,7 @@ public class CustomBanel implements EveryFrameScript {
         MainRefitPanelPlugin panelPlugin = new MainRefitPanelPlugin();
         float w = refitTab.getPosition().getWidth();
         float h = refitTab.getPosition().getHeight();
-        customPanel = new MyPanel(w, h, panelPlugin, refitTab);
-        com.fs.starfarer.coreui.refit.U refitPanel = (com.fs.starfarer.coreui.refit.U) invokeMethod("getRefitPanel", invokeMethod("getCurrentTab", core));
-
-
+        customPanel = new MyPanel(w, h, panelPlugin, refitTab, false).inBL(0, 0).initPlugin();
     }
 
 

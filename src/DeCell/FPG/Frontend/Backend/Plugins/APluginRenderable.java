@@ -17,6 +17,8 @@ public abstract class APluginRenderable {
     }
 
     public boolean needsUpdate() {
+        if (zone == null)
+            return true;
         return zone.x == -1f && zone.y == -1f;
     }
 

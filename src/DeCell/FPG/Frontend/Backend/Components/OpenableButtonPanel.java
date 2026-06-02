@@ -2,10 +2,11 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.AUIContainer;
 import DeCell.FPG.Frontend.Backend.AUIElement;
+import DeCell.FPG.Frontend.Backend.Components.Charlie.CharlieElement;
+import DeCell.FPG.Frontend.Backend.Components.Charlie.IOpenable;
+import DeCell.FPG.Frontend.Backend.Components.Charlie.OpenableListener;
 import DeCell.FPG.Frontend.Backend.Plugins.LambdaUIPanelPlugin;
 import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
-import DeCell.FPG.Frontend.Backend.Rect;
-import DeCell.FPG.Frontend.Backend.Renderable.BackgroundRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.BorderRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.JavaSlop.TriConsumer;
@@ -13,22 +14,36 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import org.lwjgl.input.Keyboard;
 
-import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, CustomPanelAPI> {
-
-    private Rect parentRect;
-    private MyPanel surrounder;
+public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, CustomPanelAPI> implements IOpenable {
 
     private MyButton button;
     private MyPanel container;
-    private boolean uiOpen = false;
+    private boolean isOpen = false;
     private Dictionary<String, Object> internalData = new Hashtable<>();
+
+    public OpenableButtonPanel(float w, float h, MyButton _1, CharlieElement parent) {
+        super(parent.u.createCustomPanel(w, h, null));
+        parent.addOpenable(this);
+
+        this.button = _1;
+        this.button.setOnClick(this::click);
+    }
+
+    public OpenableButtonPanel(float w, float h, MyButton _1, CustomPanelAPI parent) {
+        super(parent.createCustomPanel(w, h, null));
+        parent.addComponent(this.u);
+
+        this.button = _1;
+        this.button.setOnClick(this::click);
+    }
 
     public OpenableButtonPanel(float w, float h, MyButton _1, MyPanel parent) {
         super(parent.u.createCustomPanel(w, h, null));
@@ -47,7 +62,11 @@ public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, Custo
                                         .setPadding(-8).setRenderInside(true))
                 ).add(new LambdaUIPanelPlugin()
                         .onProcessInput(e ->
-                                e.forEach(InputEventAPI::consume)
+                                e.forEach($_ -> {
+                                    if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
+                                        this.click();
+                                    $_.consume();
+                                })
                         )
                 ), this.u).addTo(UIElements).inBL(0, 0);
 
@@ -65,7 +84,12 @@ public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, Custo
     protected Consumer<Dictionary<String, Object>> onUIClose;
 
     private void click(ButtonAPI b) {
-        if (uiOpen) {
+        click();
+    }
+
+    private void click() {
+
+        if (isOpen) {
             this.u.removeComponent(container.u);
             if (onUIClose != null)
                 onUIClose.accept(internalData);
@@ -74,7 +98,9 @@ public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, Custo
             if (onUIOpen != null)
                 onUIOpen.accept(container, internalData, UIElements);
         }
-        uiOpen = !uiOpen;
+        isOpen = !isOpen;
+        if (listener != null)
+            listener.onOpenStateChanged(isOpen);
     }
 
 
@@ -89,4 +115,10 @@ public class OpenableButtonPanel extends AUIContainer<OpenableButtonPanel, Custo
     }
 
 
+    private OpenableListener listener;
+
+    @Override
+    public void setOnOpenClose(OpenableListener _listener) {
+        this.listener = _listener;
+    }
 }

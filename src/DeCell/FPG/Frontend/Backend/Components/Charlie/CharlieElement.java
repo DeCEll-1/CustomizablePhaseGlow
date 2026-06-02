@@ -1,0 +1,64 @@
+package DeCell.FPG.Frontend.Backend.Components.Charlie;
+
+import DeCell.FPG.Frontend.Backend.AUIContainer;
+import DeCell.FPG.Frontend.Backend.AUIElement;
+import DeCell.FPG.Frontend.Backend.Components.MyPanel;
+import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
+import DeCell.FPG.Frontend.Backend.Renderable.BackgroundRenderable;
+import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
+
+import java.awt.*;
+
+//MyPanel charlie = new MyPanel(parent.w(), parent.h(), new RenderableHandlerPlugin()
+//        .addBelow(new BackgroundRenderable(new Color(0x9a000000, true))), parent).addTo(UIElements)
+//        .inBL(0, 0);
+
+// heres charlie, his job is to make the behind of the panels darker
+public class CharlieElement extends AUIContainer<CharlieElement, CustomPanelAPI> {
+
+    private final BackgroundRenderable background = new BackgroundRenderable(new Color(0x9A000000, true));
+    private MultiPluginHandler plugin;
+
+    public CharlieElement(MyPanel parent) {
+        super(parent.u.createCustomPanel(parent.w(), parent.h(), new MultiPluginHandler()));
+        parent.addComponent(this.u).inBL(0, 0);
+
+        this.plugin = ((MultiPluginHandler) this.u.getPlugin());
+        this.plugin.add(new RenderableHandlerPlugin().addBelow(background));
+        this.plugin.update(this.u);
+
+        this.update();
+
+        disable();
+    }
+
+    public CharlieElement(CustomPanelAPI customPanelAPI) {
+        super(customPanelAPI);
+    }
+
+    public <T extends AUIContainer<?, ?> & IOpenable> CharlieElement addOpenable(T o) {
+        this.u.addComponent(o.u);
+        o.setOnOpenClose(this::onOpenStateChanged);
+        return this;
+    }
+
+    private void onOpenStateChanged(boolean isNowOpen) {
+        if (isNowOpen) {
+            enable();
+        } else {
+            disable();
+        }
+    }
+
+    public CharlieElement enable() {
+        this.background.render = true;
+        return this;
+    }
+
+    public CharlieElement disable() {
+        this.background.render = false;
+        return this;
+    }
+}
