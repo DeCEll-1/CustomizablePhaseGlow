@@ -72,7 +72,7 @@ public class BorderRenderable extends APluginRenderable {
         // zone.render(borderSprite);
 
         // Top Left
-        new Rect(x + padding, y + h - top - padding, left, top)
+        new Rect(x + padding, y + h - top - padding, left, top) // TODO: cache these
                 .render(new Rect(0, borderTopTextureBorder, borderLeftTextureBorder, texT));
 
         // Top Right

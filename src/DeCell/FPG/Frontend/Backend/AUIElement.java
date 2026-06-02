@@ -87,6 +87,10 @@ public abstract class AUIElement<T extends AUIElement<T, U>, U extends UICompone
         return u.getPosition();
     }
 
+    public Rect rect() {
+        return new Rect(x(), y(), w(), h());
+    }
+
     public float x() {
         return u.getPosition().getX();
     }

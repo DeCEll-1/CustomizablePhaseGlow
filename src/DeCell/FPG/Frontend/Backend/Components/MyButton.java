@@ -14,26 +14,27 @@ public class MyButton extends AUIElement<MyButton, ButtonAPI> {
         super(underlying);
     }
 
-    public MyButton(String text, Object data, float width, float height, float pad, MyTooltip parent) {
-        super(parent.u.addButton(text, data, width, height, pad));
+    public MyButton(String text, float width, float height, float pad, MyTooltip parent) {
+        super(parent.u.addButton(text, null, width, height, pad));
     }
 
-    public MyButton(String text, Object data, Color base, Color bg,
+    public MyButton(String text, Color base, Color bg,
                     float width, float height, float pad, MyTooltip parent) {
-        super(parent.u.addButton(text, data, base, bg, width, height, pad));
+        super(parent.u.addButton(text, null, base, bg, width, height, pad));
     }
 
-    public MyButton(String text, Object data, Color base, Color bg,
+    public MyButton(String text, Color base, Color bg,
                     Alignment align, CutStyle style,
                     float width, float height, float pad, MyTooltip parent) {
-        super(parent.u.addButton(text, data, base, bg, align, style, width, height, pad));
+        super(parent.u.addButton(text, null, base, bg, align, style, width, height, pad));
     }
 
-    public MyButton(String text, Object data, Alignment align, CutStyle style,
+    public MyButton(String text, Alignment align, CutStyle style,
                     float width, float height, float pad, MyTooltip parent) {
-        this(text, data, Misc.getButtonTextColor(), Misc.getDarkPlayerColor(),
+        this(text, Misc.getButtonTextColor(), Misc.getDarkPlayerColor(),
                 align, style, width, height, pad, parent);
     }
+
     protected Consumer<ButtonAPI> onClick;
     protected boolean wasChecked = false;
 
@@ -54,6 +55,11 @@ public class MyButton extends AUIElement<MyButton, ButtonAPI> {
 
     public MyButton setOnClick(Consumer<ButtonAPI> onClick) {
         this.onClick = onClick;
+        return this;
+    }
+
+    public MyButton setCustomData(Object data) {
+        u.setCustomData(data);
         return this;
     }
 }

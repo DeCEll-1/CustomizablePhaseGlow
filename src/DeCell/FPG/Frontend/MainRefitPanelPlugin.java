@@ -6,6 +6,7 @@ import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Components.MyButton;
 import DeCell.FPG.Frontend.Backend.Components.MyPanel;
 import DeCell.FPG.Frontend.Backend.Components.MyTooltip;
+import DeCell.FPG.Frontend.Backend.Components.OpenableButtonPanel;
 import DeCell.FPG.Frontend.Backend.Plugins.CPanelPlugin;
 import DeCell.FPG.Frontend.Backend.Plugins.LambdaUIPanelPlugin;
 import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
@@ -13,6 +14,8 @@ import DeCell.FPG.Frontend.Backend.Renderable.BackgroundRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.BorderRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignUIAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
@@ -21,71 +24,57 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static DeCell.FPG.Reflections.invokeMethod;
+
 
 public class MainRefitPanelPlugin extends CPanelPlugin {
     public List<AUIElement<?, ?>> ActiveUIElements = new ArrayList<>();
     private final List<AUIElement<?, ?>> UIElements = new ArrayList<>();
-    private boolean uiOpen = false;
 
     public MainRefitPanelPlugin() {
-        System.out.println("New MainRefitPanelPlugin instance constructed! ID: " + System.identityHashCode(this));
     }
 
     @Override
     public void init(CustomPanelAPI _p) {
         MyPanel parent = new MyPanel(_p);
 
-        MyPanel refitWindowOpenerButtonPanel = new MyPanel(190, 25, null, parent).addTo(UIElements);
-        refitWindowOpenerButtonPanel.getPosition().inBL(601, 40);
+        MyPanel refitWindowOpenerButtonPanel = new MyPanel(190, 25, null, parent)
+                .addTo(UIElements).inBL(601, 40);
 
-        MyTooltip refitWindowOpenerTooltip = new MyTooltip(190, 25, false, refitWindowOpenerButtonPanel);
-        new MyButton("Modify Phase Effects", null, new Color(0xDDDDDD), new Color(0x444444), Alignment.MID, CutStyle.TL_BR, 190, 25, 0f, refitWindowOpenerTooltip)
-                .setOnClick((b) ->
+        MyTooltip refitWindowOpenerTooltip = new MyTooltip(190, 25, false, refitWindowOpenerButtonPanel).addTo(UIElements);
+        MyButton panelOpeningButton = new MyButton("Modify Phase Effects", new Color(0xDDDDDD), new Color(0x444444), Alignment.MID, CutStyle.TL_BR, 190, 25, 0f, refitWindowOpenerTooltip)
+                .addTo(UIElements);
+
+        new OpenableButtonPanel(720, 640, panelOpeningButton, parent).inTL(210, 50).addTo(UIElements)
+                .setOnUIOpen((panel, internalData, _UIElements) ->
                 {
-                    if (uiOpen)
-                        return;
-                    uiOpen = true;
-
-//                    FancyPhaseGlow.Log("Opened Modify Phase Effects Menu");
                     // evil
-                    MyPanel charlie = new MyPanel(parent.w(), parent.h(), new RenderableHandlerPlugin()
-                            .addBelow(new BackgroundRenderable(new Color(0x9a000000, true))), parent).addTo(UIElements)
-                            .inBL(0, 0); // its called charlie because hes evil
+                    MyTooltip debugOpeningTooltip = new MyTooltip(190, 24, false, panel).addTo(_UIElements).inBR(16, 4);
+                    MyButton debugButton = new MyButton("Debug", Alignment.MID, CutStyle.TOP, 190, 24, 0, debugOpeningTooltip).addTo(_UIElements).inMid();
 
-                    MyPanel mainEditingPanel = new MyPanel(720, 640, new MultiPluginHandler()
-                            .add(new RenderableHandlerPlugin()
-                                    .addBelow(
-                                            new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"), 32)
-                                                    .setPadding(-8).setRenderInside(true))
-                            ).add(new LambdaUIPanelPlugin()
-                                    .onProcessInput(e ->
-                                            e.forEach(InputEventAPI::consume)
-                                    )
-                            ), charlie).addTo(UIElements)
-                            .inTL(210, 50);
 
-                    MyTooltip exitTooltip = new MyTooltip(24, 24, false, mainEditingPanel).addTo(UIElements).inTR(26, 16);
-
-                    new MyButton("X", null, 24, 24, 0, exitTooltip).
-                            setOnClick(s -> {
-                                parent.u.removeComponent(charlie.u);
-                                uiOpen = false;
-                            }).addTo(UIElements);
-
-                    MyPanel shaderSelectionContainer = new MyPanel(190, 25, null, mainEditingPanel).addTo(UIElements).inTL(26, 30);
-
-                    MyTooltip shaderSelectionTooltip = new MyTooltip(190, 25, false, shaderSelectionContainer).addTo(UIElements);
-
-                    new MyCombobox(new MyButton("Select Element", null, Alignment.MID, CutStyle.TOP, 190, 25, 0, shaderSelectionTooltip).addTo(UIElements), shaderSelectionTooltip, shaderSelectionContainer)
+                    MyPanel shaderSelectionContainer = new MyPanel(190, 25, null, panel).addTo(_UIElements).inTL(26, 30);
+                    MyTooltip shaderSelectionTooltip = new MyTooltip(190, 25, false, shaderSelectionContainer).addTo(_UIElements);
+                    new MyCombobox(new MyButton("Select Element", Alignment.MID, CutStyle.TOP, 190, 25, 0, shaderSelectionTooltip).addTo(_UIElements), shaderSelectionContainer)
                             .addItem(new ComboboxElement("balls"))
                             .addItem(new ComboboxElement("balls2"))
                             .addItem(new ComboboxElement("balls3"))
                             .addItem(new ComboboxElement("balls4"))
-                            .addTo(UIElements)
+                            .addTo(_UIElements)
+                            .setOnUpdate(el -> {
+                            })
                     ;
+                });
+    }
 
+    private static com.fs.starfarer.coreui.refit.U getRefitPanel() {
+        CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
+        InteractionDialogAPI dialog = campaignUI.getCurrentInteractionDialog();
 
-                }).addTo(UIElements);
+        Object core = dialog == null
+                ? invokeMethod("getCore", campaignUI)
+                : invokeMethod("getCoreUI", dialog);
+        return (com.fs.starfarer.coreui.refit.U) invokeMethod("getRefitPanel", invokeMethod("getCurrentTab", core));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package DeCell.FPG.Frontend.Backend.Components.Combobox;
 
+import DeCell.FPG.Frontend.Backend.AUIContainer;
 import DeCell.FPG.Frontend.Backend.AUIElement;
 import DeCell.FPG.Frontend.Backend.Components.MyButton;
 import DeCell.FPG.Frontend.Backend.Components.MyPanel;
@@ -15,18 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MyCombobox extends AUIElement<MyCombobox, UIComponentAPI> {
+public class MyCombobox extends AUIContainer<MyCombobox, UIComponentAPI> {
 
     private MyButton button;
-    private MyTooltip tooltip;
     private MyPanel panel;
     private MyPanel container;
     private boolean listOpen = false;
 
-    public MyCombobox(MyButton _0, MyTooltip _1, MyPanel _2) {
+    public MyCombobox(MyButton _0, MyPanel _2) {
         super(_2.u);
         this.button = _0;
-        this.tooltip = _1;
         this.panel = _2;
         button.setOnClick(this::click);
     }
@@ -43,8 +42,6 @@ public class MyCombobox extends AUIElement<MyCombobox, UIComponentAPI> {
             closeList();
     }
 
-    public List<AUIElement<?, ?>> ActiveUIElements = new ArrayList<>();
-    private final List<AUIElement<?, ?>> UIElements = new ArrayList<>();
     private List<ComboboxElement> elements = new ArrayList<>();
     protected Consumer<ComboboxElement> onChange;
 
@@ -61,7 +58,6 @@ public class MyCombobox extends AUIElement<MyCombobox, UIComponentAPI> {
 
         container = new MyPanel(w, h,
                 new RenderableHandlerPlugin()
-//                        .addBelow(new BackgroundRenderable(new Color(0x88FFFFFF, true)))
                 , panel)
                 .inBL(5, -h).update();
 
@@ -73,7 +69,7 @@ public class MyCombobox extends AUIElement<MyCombobox, UIComponentAPI> {
 
             MyTooltip elementTooltip = new MyTooltip(w, itemHeight, false, container).inTL(0, i * paddedHeight + 2);
             CutStyle style = i == elements.size() - 1 ? CutStyle.BOTTOM : CutStyle.NONE;
-            new MyButton(element.text, element.data, Alignment.MID, style, w, itemHeight, 0, elementTooltip)
+            new MyButton(element.text, Alignment.MID, style, w, itemHeight, 0, elementTooltip).setCustomData(element.data)
                     .setOnClick(b -> {
                                 button.u.setText(b.getText());
                                 button.u.setCustomData(b.getCustomData());
@@ -87,25 +83,6 @@ public class MyCombobox extends AUIElement<MyCombobox, UIComponentAPI> {
     private void closeList() {
         listOpen = false;
         panel.u.removeComponent(container.u);
-    }
-
-    @Override
-    public void advance(float amount) {
-        for (AUIElement<?, ?> element : ActiveUIElements) {
-            element.advance(amount);
-        }
-
-        if (!UIElements.isEmpty()) {
-            ActiveUIElements.addAll(UIElements);
-            UIElements.clear();
-        }
-    }
-
-    @Override
-    public void processInput(List<InputEventAPI> events) {
-        for (AUIElement<?, ?> element : ActiveUIElements) {
-            element.processInput(events);
-        }
     }
 
 }
