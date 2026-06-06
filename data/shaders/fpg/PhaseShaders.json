@@ -1,5 +1,5 @@
 {
-    "$schema": "./../../../Schemav1.json",
+    "$schema": "./Schemav1.json",
     "Shaders": [
         {
             "ID": "fpg_radial",
