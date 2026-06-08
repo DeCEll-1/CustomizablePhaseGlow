@@ -2,10 +2,7 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Frontend.Backend.UIElement;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
-import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.PersonImportance;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
@@ -22,9 +19,6 @@ import java.awt.*;
 import java.util.Set;
 
 public class MyTooltip extends UIContainer<MyTooltip, TooltipMakerAPI> {
-    public MyTooltip(TooltipMakerAPI underlying) {
-        super(underlying);
-    }
 
     public MyTooltip(float w, float h, boolean withScroller, MyPanel parent) {
         super(parent.u.createUIElement(w, h, withScroller));
@@ -34,6 +28,32 @@ public class MyTooltip extends UIContainer<MyTooltip, TooltipMakerAPI> {
     public MyTooltip(float w, float h, boolean withScroller, CustomPanelAPI parent) {
         super(parent.createUIElement(w, h, withScroller));
         parent.addUIElement(u);
+    }
+
+    public static class Builder {
+        private final float width;
+        private final float height;
+        private boolean withScroller = false;
+        private final MyPanel parent;
+
+        public Builder(float width, float height, MyPanel parent) {
+            this.width = width;
+            this.height = height;
+            this.parent = parent;
+        }
+
+        public Builder setWithScroller(boolean withScroller) {
+            this.withScroller = withScroller;
+            return this;
+        }
+
+        public MyTooltip b() {
+            return new MyTooltip(width, height, withScroller, parent);
+        }
+
+        public MyTooltip build() {
+            return this.b();
+        }
     }
 
     //#region Text & Typography

@@ -6,13 +6,19 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.combat.entities.Ship;
+import com.fs.starfarer.coreui.refit.U;
+import com.fs.starfarer.loading.specs.HullVariantSpec;
 
-import static DeCell.FPG.Reflections.invokeMethod;
+import java.util.Objects;
+
+import static DeCell.FPG.Helpers.UI.getCurrentTab;
+import static DeCell.FPG.Helpers.UI.getRefitPanel;
 
 public class CustomBanel implements EveryFrameScript {
     private MyPanel customPanel;
+    private String shipID = "";
 
     public void attachRefitOverlay() {
         CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
@@ -23,19 +29,25 @@ public class CustomBanel implements EveryFrameScript {
             return;
         }
 
-        InteractionDialogAPI dialog = campaignUI.getCurrentInteractionDialog();
-
-        Object core = dialog == null
-                ? invokeMethod("getCore", campaignUI)
-                : invokeMethod("getCoreUI", dialog);
-
-        UIPanelAPI refitTab = (UIPanelAPI) invokeMethod("getCurrentTab", core);
+        UIPanelAPI refitTab = (UIPanelAPI) getCurrentTab();
+        U refitPanel = getRefitPanel();
+        Ship ship = refitPanel.getShipDisplay().getShip();
+        boolean isPhaseShip = ship.getVariant().hasHullMod("phasefield");
+        String tmpShipID = ship.getId();
+        if (!isPhaseShip || !Objects.equals(tmpShipID, shipID)) {
+            if (customPanel != null)
+                refitTab.removeComponent(customPanel.u);
+            customPanel = null;
+            shipID = tmpShipID;
+            return;
+        }
         if (customPanel != null) return;
 
-        MainRefitPanelPlugin panelPlugin = new MainRefitPanelPlugin();
+        MainRefitPanelPlugin panelPlugin = new MainRefitPanelPlugin(ship);
         float w = refitTab.getPosition().getWidth();
         float h = refitTab.getPosition().getHeight();
-        customPanel = new MyPanel(w, h, panelPlugin, refitTab, false).inBL(0, 0).initPlugin();
+        customPanel = new MyPanel.Builder(w, h).setPlugin(panelPlugin).setInit(false).build(refitTab)
+                .inBL(0, 0).initPlugin();
     }
 
 

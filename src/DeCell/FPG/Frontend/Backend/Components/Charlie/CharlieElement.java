@@ -9,10 +9,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 
 import java.awt.*;
 
-//MyPanel charlie = new MyPanel(parent.w(), parent.h(), new RenderableHandlerPlugin()
-//        .addBelow(new BackgroundRenderable(new Color(0x9a000000, true))), parent).addTo(UIElements)
-//        .inBL(0, 0);
-
 // heres charlie, his job is to make the behind of the panels darker
 public class CharlieElement extends UIContainer<CharlieElement, CustomPanelAPI> {
 

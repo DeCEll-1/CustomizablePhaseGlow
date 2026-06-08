@@ -13,43 +13,39 @@ import DeCell.FPG.JavaSlop.TriConsumer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class OpenableButtonPanel extends UIContainer<OpenableButtonPanel, CustomPanelAPI> implements Openable {
+import static DeCell.FPG.Helpers.UI.getCurrentTab;
+
+public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, CustomPanelAPI> implements Openable {
 
     private MyButton button;
     private MyPanel container;
     private boolean isOpen = false;
-    private Dictionary<String, Object> internalData = new Hashtable<>();
 
-    public OpenableButtonPanel(float w, float h, MyButton _1, CharlieElement parent) {
+    public DialougeButtonPanel(float w, float h, MyButton _1, CharlieElement parent) {
         super(parent.u.createCustomPanel(w, h, null));
         parent.addOpenable(this);
+        parent.addElement(this);
 
         this.button = _1;
         this.button.setOnClick(this::click);
     }
 
-    public OpenableButtonPanel(float w, float h, MyButton _1, CustomPanelAPI parent) {
-        super(parent.createCustomPanel(w, h, null));
-        parent.addComponent(this.u);
-
-        this.button = _1;
-        this.button.setOnClick(this::click);
-    }
-
-    public OpenableButtonPanel(float w, float h, MyButton _1, MyPanel parent) {
+    public DialougeButtonPanel(float w, float h, MyButton _1, MyPanel parent) {
         super(parent.u.createCustomPanel(w, h, null));
         parent.addComponent(this.u);
+        parent.addElement(this);
 
         this.button = _1;
         this.button.setOnClick(this::click);
     }
+
 
     private void createContainer() {
         this.container = new MyPanel(this.w(), this.h(), new MultiPluginHandler() // main window
@@ -74,7 +70,7 @@ public class OpenableButtonPanel extends UIContainer<OpenableButtonPanel, Custom
                 setOnClick(this::click).addTo(UIElements);
     }
 
-    public OpenableButtonPanel(CustomPanelAPI underlying) {
+    public DialougeButtonPanel(CustomPanelAPI underlying) {
         super(underlying);
     }
 
@@ -101,22 +97,49 @@ public class OpenableButtonPanel extends UIContainer<OpenableButtonPanel, Custom
             listener.onOpenStateChanged(isOpen);
     }
 
-
-    public OpenableButtonPanel setOnUIOpen(TriConsumer<MyPanel, Dictionary<String, Object>, List<UIElement<?, ?>>> onClick) {
+    public DialougeButtonPanel setOnUIOpen(TriConsumer<MyPanel, Dictionary<String, Object>, List<UIElement<?, ?>>> onClick) {
         this.onUIOpen = onClick;
         return this;
     }
 
-    public OpenableButtonPanel setOnUIClose(Consumer<Dictionary<String, Object>> onClick) {
+    public DialougeButtonPanel setOnUIClose(Consumer<Dictionary<String, Object>> onClick) {
         this.onUIClose = onClick;
         return this;
     }
-
 
     private OpenableListener listener;
 
     @Override
     public void setOnOpenClose(OpenableListener _listener) {
         this.listener = _listener;
+    }
+
+    public static class Builder {
+        private final float w;
+        private final float h;
+        private final MyButton button;
+        private boolean charlie = false;
+
+        public Builder(float width, float height, MyButton button) {
+            this.w = width;
+            this.h = height;
+            this.button = button;
+        }
+
+        public Builder withCharlie() {
+            charlie = true;
+            return this;
+        }
+
+        public DialougeButtonPanel popup(List<UIElement<?, ?>> UIElements) {
+            UIPanelAPI currentTab = (UIPanelAPI) getCurrentTab();
+            MyPanel popupContainer = new MyPanel.Builder(currentTab.getPosition().getWidth(), currentTab.getPosition().getHeight()).build(currentTab).addTo(UIElements);
+            if (charlie) {
+                CharlieElement charlie = new CharlieElement(popupContainer);
+                return new DialougeButtonPanel(w, h, button, charlie).inMid();
+            }
+
+            return new DialougeButtonPanel(w, h, button, popupContainer);
+        }
     }
 }

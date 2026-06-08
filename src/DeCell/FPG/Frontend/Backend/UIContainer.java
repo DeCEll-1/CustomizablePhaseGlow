@@ -4,12 +4,24 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 public abstract class UIContainer<T extends UIElement<T, U>, U extends UIComponentAPI> extends UIElement<T, U> {
 
     protected final List<UIElement<?, ?>> activeUIElements = new ArrayList<>();
     protected final List<UIElement<?, ?>> UIElements = new ArrayList<>();
+    protected Dictionary<String, Object> internalData = new Hashtable<>();
+
+    public T initInteralData(DataPair... entries) {
+        for (DataPair entry : entries) {
+            if (entry != null) {
+                internalData.put(entry.key, entry.value);
+            }
+        }
+        return (T) this;
+    }
 
     public UIContainer(U u) {
         super(u);

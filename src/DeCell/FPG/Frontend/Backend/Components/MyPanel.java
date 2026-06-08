@@ -37,12 +37,6 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
         parent.addComponent(u);
     }
 
-    public MyPanel(float w, float h, PanelPlugin p, boolean init) {
-        super(Global.getSettings().createCustom(w, h, p));
-        this.plugin = p;
-        if (init) initPlugin();
-    }
-
     public MyPanel(float w, float h, PanelPlugin p, MyPanel parent) {
         this(w, h, p, parent, true);
     }
@@ -53,10 +47,6 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
 
     public MyPanel(float w, float h, PanelPlugin p, UIPanelAPI parent) {
         this(w, h, p, parent, true);
-    }
-
-    public MyPanel(float w, float h, PanelPlugin p) {
-        this(w, h, p, true);
     }
 
     //#endregion
@@ -104,6 +94,42 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
         if (plugin != null)
             plugin.update(u);
         return this;
+    }
+
+
+    public static class Builder {
+        private final float width;
+        private final float height;
+
+        private PanelPlugin plugin = null;
+        private boolean init = true;
+
+        public Builder(float width, float height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public Builder setPlugin(PanelPlugin plugin) {
+            this.plugin = plugin;
+            return this;
+        }
+
+        public Builder setInit(boolean init) {
+            this.init = init;
+            return this;
+        }
+
+        public MyPanel build(MyPanel parent) {
+            return new MyPanel(width, height, plugin, parent, init);
+        }
+
+        public MyPanel build(CustomPanelAPI parent) {
+            return new MyPanel(width, height, plugin, parent, init);
+        }
+
+        public MyPanel build(UIPanelAPI parent) {
+            return new MyPanel(width, height, plugin, parent, init);
+        }
     }
 
 

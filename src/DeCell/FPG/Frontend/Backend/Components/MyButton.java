@@ -10,9 +10,6 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 public class MyButton extends UIElement<MyButton, ButtonAPI> {
-    public MyButton(ButtonAPI underlying) {
-        super(underlying);
-    }
 
     public MyButton(String text, float width, float height, float pad, MyTooltip parent) {
         super(parent.addButton(text, null, width, height, pad));
@@ -64,5 +61,71 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
     public MyButton setCustomData(Object data) {
         u.setCustomData(data);
         return this;
+    }
+
+    public static class Builder {
+        private final String text;
+        private final float width;
+        private final float height;
+        private final MyTooltip parent;
+
+        private float pad = 0f;
+        private Color baseColor = null;
+        private Color bgColor = null;
+        private Alignment alignment = null;
+        private CutStyle cutStyle = null;
+
+        public Builder(String text, float width, float height, MyTooltip parent) {
+            this.text = text;
+            this.width = width;
+            this.height = height;
+            this.parent = parent;
+        }
+
+        public Builder(String text, float width, float height, MyPanel parent) {
+            this.text = text;
+            this.width = width;
+            this.height = height;
+            this.parent = new MyTooltip.Builder(width, height, parent).b();
+        }
+
+        public Builder modifyParent(Consumer<MyTooltip> zaza) { // needed for when you input panel and need to update the tooltips properties
+            zaza.accept(parent);
+            return this;
+        }
+
+        public Builder setPad(float pad) {
+            this.pad = pad;
+            return this;
+        }
+
+        public Builder setColors(Color baseColor, Color bgColor) {
+            this.baseColor = baseColor;
+            this.bgColor = bgColor;
+            return this;
+        }
+
+        public Builder setStyle(Alignment alignment, CutStyle cutStyle) {
+            this.alignment = alignment;
+            this.cutStyle = cutStyle;
+            return this;
+        }
+
+        public MyButton build() {
+            if (baseColor != null && bgColor != null && alignment != null && cutStyle != null) {
+                return new MyButton(text, baseColor, bgColor, alignment, cutStyle, width, height, pad, parent);
+            }
+
+            if (baseColor != null && bgColor != null) {
+                return new MyButton(text, baseColor, bgColor, width, height, pad, parent);
+            }
+
+            if (alignment != null && cutStyle != null) {
+                return new MyButton(text, alignment, cutStyle, width, height, pad, parent);
+            }
+
+            return new MyButton(text, width, height, pad, parent);
+        }
+
     }
 }
