@@ -1,7 +1,6 @@
 package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.UIContainer;
-import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -47,13 +46,10 @@ public class MyTooltip extends UIContainer<MyTooltip, TooltipMakerAPI> {
             return this;
         }
 
-        public MyTooltip b() {
+        public MyTooltip build() {
             return new MyTooltip(width, height, withScroller, parent);
         }
 
-        public MyTooltip build() {
-            return this.b();
-        }
     }
 
     //#region Text & Typography

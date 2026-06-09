@@ -7,6 +7,7 @@ import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.*;
+import java.util.Dictionary;
 import java.util.function.Consumer;
 
 public class MyButton extends UIElement<MyButton, ButtonAPI> {
@@ -35,7 +36,7 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
                 align, style, width, height, pad, parent);
     }
 
-    protected Consumer<ButtonAPI> onClick;
+    protected Consumer<MyButton> onClick;
     protected boolean wasChecked = false;
 
     @Override
@@ -45,7 +46,7 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
         boolean currentlyChecked = u.isChecked();
         if (currentlyChecked && !wasChecked) {
             if (onClick != null) {
-                onClick.accept(u);
+                onClick.accept(this);
             }
             u.setChecked(false);
         }
@@ -53,7 +54,7 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
     }
 
 
-    public MyButton setOnClick(Consumer<ButtonAPI> onClick) {
+    public MyButton setOnClick(Consumer<MyButton> onClick) {
         this.onClick = onClick;
         return this;
     }
@@ -65,10 +66,9 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
 
     public static class Builder {
         private final String text;
-        private final float width;
-        private final float height;
-        private final MyTooltip parent;
-
+        private float w;
+        private float h;
+        private MyTooltip parent = null;
         private float pad = 0f;
         private Color baseColor = null;
         private Color bgColor = null;
@@ -77,16 +77,53 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
 
         public Builder(String text, float width, float height, MyTooltip parent) {
             this.text = text;
-            this.width = width;
-            this.height = height;
+            this.w = width;
+            this.h = height;
             this.parent = parent;
         }
 
         public Builder(String text, float width, float height, MyPanel parent) {
             this.text = text;
-            this.width = width;
-            this.height = height;
-            this.parent = new MyTooltip.Builder(width, height, parent).b();
+            this.w = width;
+            this.h = height;
+            this.parent = new MyTooltip.Builder(width, height, parent).build();
+        }
+
+        public Builder(String text, MyTooltip parent) {
+            this(text, 0, 0, parent);
+        }
+
+        public Builder(String text, MyPanel parent) {
+            this(text, 0, 0, parent);
+        }
+
+        public Builder(String text, float width, float height) {
+            this.text = text;
+            this.w = width;
+            this.h = height;
+        }
+
+        public Builder(String text) {
+            this(text, 0, 0);
+        }
+
+        public Builder setParent(MyPanel panel) {
+            this.parent = new MyTooltip.Builder(this.w, this.h, panel).build();
+            return this;
+        }
+
+        public boolean havesParent() {
+            return parent != null;
+        }
+
+        public Builder setParent(MyTooltip panel) {
+            this.parent = panel;
+            return this;
+        }
+
+        public Builder position(Consumer<UIElement<?, ?>> zaza) {
+            zaza.accept(parent);
+            return this;
         }
 
         public Builder modifyParent(Consumer<MyTooltip> zaza) { // needed for when you input panel and need to update the tooltips properties
@@ -96,6 +133,12 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
 
         public Builder setPad(float pad) {
             this.pad = pad;
+            return this;
+        }
+
+        public Builder setShape(float w, float h) {
+            this.w = w;
+            this.h = h;
             return this;
         }
 
@@ -113,18 +156,18 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
 
         public MyButton build() {
             if (baseColor != null && bgColor != null && alignment != null && cutStyle != null) {
-                return new MyButton(text, baseColor, bgColor, alignment, cutStyle, width, height, pad, parent);
+                return new MyButton(text, baseColor, bgColor, alignment, cutStyle, w, h, pad, parent);
             }
 
             if (baseColor != null && bgColor != null) {
-                return new MyButton(text, baseColor, bgColor, width, height, pad, parent);
+                return new MyButton(text, baseColor, bgColor, w, h, pad, parent);
             }
 
             if (alignment != null && cutStyle != null) {
-                return new MyButton(text, alignment, cutStyle, width, height, pad, parent);
+                return new MyButton(text, alignment, cutStyle, w, h, pad, parent);
             }
 
-            return new MyButton(text, width, height, pad, parent);
+            return new MyButton(text, w, h, pad, parent);
         }
 
     }

@@ -5,6 +5,7 @@ import DeCell.FPG.Frontend.Backend.Components.MyButton;
 import DeCell.FPG.Frontend.Backend.Components.MyPanel;
 import DeCell.FPG.Frontend.Backend.Components.MyTooltip;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
+import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CutStyle;
@@ -13,6 +14,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static DeCell.FPG.Frontend.Backend.DataPair.pair;
 
 public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
 
@@ -34,7 +37,7 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
         return this;
     }
 
-    private void click(ButtonAPI b) {
+    private void click(MyButton b) {
         if (!listOpen)
             openList();
         else
@@ -53,7 +56,6 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
         listOpen = true;
         float w = Math.max(elements.stream().mapToInt(s -> s.text.length() * 16).max().orElse((int) button.w()), panel.w());
         float h = elements.size() * 26;
-//        h = 500;
 
         container = new MyPanel(w, h,
                 new RenderableHandlerPlugin()
@@ -68,20 +70,69 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
 
             MyTooltip elementTooltip = new MyTooltip(w, itemHeight, false, container).inTL(0, i * paddedHeight + 2);
             CutStyle style = i == elements.size() - 1 ? CutStyle.BOTTOM : CutStyle.NONE;
-            new MyButton(element.text, Alignment.MID, style, w, itemHeight, 0, elementTooltip).setCustomData(element.data)
+            new MyButton.Builder(element.text, w, itemHeight, elementTooltip).setStyle(Alignment.MID, style).build()
+                    .setCustomData(element.data)
+                    .initInteralData(pair("index", i))
                     .setOnClick(b -> {
-                                button.u.setText(b.getText());
-                                button.u.setCustomData(b.getCustomData());
-                                onChange.accept(element);
-                                closeList();
+                                setIndex(b.getFromInternal("index"));
                             }
                     ).addTo(UIElements).inTL(0, 0);
         }
     }
 
+    public MyCombobox setIndex(int index) {
+        if (index < 0 || index >= elements.size()) {
+            return this;
+        }
+        ComboboxElement element = elements.get(index);
+        if (button != null && button.u != null) {
+            button.u.setText(element.text);
+            button.u.setCustomData(element.data);
+        }
+        if (onChange != null) {
+            onChange.accept(element);
+        }
+        if (listOpen) {
+            closeList();
+        }
+        return this;
+    }
+
     private void closeList() {
         listOpen = false;
         panel.u.removeComponent(container.u);
+    }
+
+    public static class Builder {
+        private final float w;
+        private final float h;
+        //        private final MyButton button;
+        private final MyPanel parent;
+        private final MyButton.Builder button;
+
+        public Builder(float w, float h, MyButton.Builder btnBuilder, MyPanel parent) {
+            this.w = w;
+            this.h = h;
+            this.parent = new MyPanel.Builder(w, h).build(parent);
+            if (!btnBuilder.havesParent())
+                btnBuilder.setParent(parent);
+            this.button = btnBuilder.setShape(w, h);
+        }
+
+        public Builder position(Consumer<UIElement<?, ?>> zaza) {
+            zaza.accept(parent);
+            button.position(zaza);
+            return this;
+        }
+
+        public Builder modifyParent(Consumer<MyPanel> zaza) {
+            zaza.accept(parent);
+            return this;
+        }
+
+        public MyCombobox build() {
+            return new MyCombobox(this.button.build(), this.parent);
+        }
     }
 
 }

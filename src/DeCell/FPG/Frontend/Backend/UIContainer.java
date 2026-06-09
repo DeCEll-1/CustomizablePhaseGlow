@@ -12,16 +12,7 @@ public abstract class UIContainer<T extends UIElement<T, U>, U extends UICompone
 
     protected final List<UIElement<?, ?>> activeUIElements = new ArrayList<>();
     protected final List<UIElement<?, ?>> UIElements = new ArrayList<>();
-    protected Dictionary<String, Object> internalData = new Hashtable<>();
 
-    public T initInteralData(DataPair... entries) {
-        for (DataPair entry : entries) {
-            if (entry != null) {
-                internalData.put(entry.key, entry.value);
-            }
-        }
-        return (T) this;
-    }
 
     public UIContainer(U u) {
         super(u);

@@ -41,23 +41,22 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
         new DialougeButtonPanel.Builder(720, 640, panelOpeningButton).withCharlie().popup(UIElements)
                 .initInteralData(pair("ship", ship))
-                .setOnUIOpen((panel, internalData, _UIElements) ->
+                .setOnUIOpen((panel, dialouge, _UIElements) ->
                 {
-                    Ship currShip = (Ship) internalData.get("ship");
-                    // evil
+                    Ship currShip = dialouge.getFromInternal("ship");
 
                     MyButton debugButton = new MyButton.Builder("Debug", 190, 24, panel)
                             .setStyle(Alignment.MID, CutStyle.TOP)
-                            .modifyParent(s -> s.inBR(16, 4))
+                            .position(s -> s.inBR(16, 4))
                             .build().inMid();
 
-                    MyPanel shaderSelectionContainer = new MyPanel.Builder(190, 25).build(panel).inTL(26, 30);
-                    new MyCombobox(
-                            new MyButton.Builder("Select Element", 190, 25, panel)
-                                    .setStyle(Alignment.MID, CutStyle.TOP)
-                                    .modifyParent(s -> s.inTL(26, 30))
-                                    .build()
-                            , shaderSelectionContainer)
+                    new MyCombobox.Builder(
+                            190, 25,
+                            new MyButton.Builder("Select Element")
+                                    .setStyle(Alignment.MID, CutStyle.TOP),
+                            panel
+                    ).position(s -> s.inTL(26, 30))
+                            .build()
                             .addItem(new ComboboxElement("balls"))
                             .addItem(new ComboboxElement("balls2"))
                             .addItem(new ComboboxElement("balls3"))

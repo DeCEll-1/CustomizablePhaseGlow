@@ -74,10 +74,10 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         super(underlying);
     }
 
-    protected TriConsumer<MyPanel, Dictionary<String, Object>, List<UIElement<?, ?>>> onUIOpen;
+    protected TriConsumer<MyPanel, DialougeButtonPanel, List<UIElement<?, ?>>> onUIOpen;
     protected Consumer<Dictionary<String, Object>> onUIClose;
 
-    private void click(ButtonAPI b) {
+    private void click(MyButton b) {
         click();
     }
 
@@ -90,14 +90,14 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         } else {
             createContainer();
             if (onUIOpen != null)
-                onUIOpen.accept(container, internalData, UIElements);
+                onUIOpen.accept(container, this, UIElements);
         }
         isOpen = !isOpen;
         if (listener != null)
             listener.onOpenStateChanged(isOpen);
     }
 
-    public DialougeButtonPanel setOnUIOpen(TriConsumer<MyPanel, Dictionary<String, Object>, List<UIElement<?, ?>>> onClick) {
+    public DialougeButtonPanel setOnUIOpen(TriConsumer<MyPanel, DialougeButtonPanel, List<UIElement<?, ?>>> onClick) {
         this.onUIOpen = onClick;
         return this;
     }

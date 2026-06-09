@@ -4,6 +4,8 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -15,6 +17,21 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
     protected Consumer<U> onHover;
 
     protected boolean wasHovered = false;
+
+    protected Dictionary<String, Object> internalData = new Hashtable<>();
+
+    public T initInteralData(DataPair... entries) {
+        for (DataPair entry : entries) {
+            if (entry != null) {
+                internalData.put(entry.key, entry.value);
+            }
+        }
+        return (T) this;
+    }
+
+    public <Z> Z getFromInternal(String s) {
+        return (Z) this.internalData.get(s);
+    }
 
     public UIElement(U underlying) {
         this.u = underlying;
@@ -73,7 +90,7 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
         return (T) this;
     }
 
-    public T SetOnHover(Consumer<U> onHover) {  
+    public T SetOnHover(Consumer<U> onHover) {
         this.onHover = onHover;
         return (T) this;
     }
@@ -127,7 +144,7 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
         return (T) this;
     }
 
-// --- Parent Container Positioning ---
+//#region --- Parent Container Positioning ---
 
     public T inTL(float xPad, float yPad) {
         getPosition().inTL(xPad, yPad);
@@ -174,7 +191,9 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
         return (T) this;
     }
 
-// --- Sibling Relative Positioning ---
+    //#endregion
+
+//#region --- Sibling Relative Positioning ---
 
     public T leftOfTop(UIComponentAPI sibling, float xPad) {
         getPosition().leftOfTop(sibling, xPad);
@@ -235,4 +254,6 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
         getPosition().belowRight(sibling, yPad);
         return (T) this;
     }
+
+    //#endregion
 }
