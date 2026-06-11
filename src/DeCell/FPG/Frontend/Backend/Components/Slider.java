@@ -1,6 +1,7 @@
 package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
+import DeCell.FPG.Frontend.Backend.Components.Gears.Scroll;
 import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
 import DeCell.FPG.Frontend.Backend.Renderable.PluginRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
@@ -33,7 +34,12 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         super(sldr.u);
         this.slider = sldr;
         slider.addElement(this);
-        slider.setOnHover(this::sliderOnHover);
+        Scroll scrollGear = new Scroll();
+        slider.setOnHover(scrollGear::onHover);
+        scrollGear.addScrollListener(s -> {
+            handleRelativeX += s;
+            updateHandle();
+        });
         slider.setOnMouseDown(this::onSliderClick);
 
         handle = hndl;
@@ -97,51 +103,6 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         updateHandle();
         return this;
     }
-    //#endregion
-
-    //#region scroll
-    private static final float scrollDelta = 2f;
-    private static final float maxAccelerationMultiplier = 8f;
-    private static final long accelerationThresholdMS = 100;
-
-    private long lastScrollEventNanos = 0;
-    private long lastScrollTimeMs = 0; // Tracks the absolute system time of the last scroll action
-
-    private void sliderOnHover(MyPanel DISCARD_THIS_THING_BRUH) {
-        if (!slider.rect().containsMouse())
-            return;
-
-        int wheelDelta = Mouse.getEventDWheel();
-        if (wheelDelta == 0)
-            return;
-
-        long currentEventNanos = Mouse.getEventNanoseconds();
-        if (currentEventNanos == lastScrollEventNanos)
-            return;
-        lastScrollEventNanos = currentEventNanos;
-
-        long currentTimeMs = System.currentTimeMillis();
-        long timeSinceLastScroll = currentTimeMs - lastScrollTimeMs;
-        lastScrollTimeMs = currentTimeMs;
-
-        float currentScrollDelta = scrollDelta;
-
-        if (timeSinceLastScroll < accelerationThresholdMS && timeSinceLastScroll > 0) {
-            float speedFactor = (float) accelerationThresholdMS / timeSinceLastScroll;
-
-            float multiplier = Math.min(speedFactor, maxAccelerationMultiplier);
-
-            currentScrollDelta *= multiplier;
-        }
-
-        if (wheelDelta > 0) {
-            handleRelativeX += currentScrollDelta;
-        } else {
-            handleRelativeX -= currentScrollDelta;
-        }
-        updateHandle();
-    }
-
     //#endregion
 
     //#region panel

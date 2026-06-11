@@ -79,10 +79,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             .setMaxChars(50).setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
 
                     new NumericUpDown.Builder().build(200, panel)
-//                            .belowMid(testTB.u, 2)
-                            .belowRight(testTB.getParent().u, 2)
-//                            .inTR(80, 80)
-                    ;
+                            .belowRight(testTB.getParent().u, 2);
 
 
                 });

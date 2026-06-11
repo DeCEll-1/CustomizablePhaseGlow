@@ -2,6 +2,7 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
+import DeCell.FPG.Frontend.Backend.Components.Gears.Scroll;
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Helpers.ElapsingInterval;
 import DeCell.FPG.Misc;
@@ -12,6 +13,7 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.util.List;
 
@@ -32,14 +34,28 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         this.up = _up;
         this.down = _down;
 
-        // TODO: handle null stirng properly
         tb.setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
+
         this.setValue(0);
 
         up.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", ButtonType.UP));
         down.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", ButtonType.DOWN));
 
+
+        Scroll scrollGear = new Scroll();
+        tb.setOnHover(scrollGear::onHover);
+        up.setOnHover(scrollGear::onHover);
+        down.setOnHover(scrollGear::onHover);
+        scrollGear.addScrollListener(this::onScrollEnd);
+
         setAmountOfDecimalPlaces(2);
+    }
+
+    private void onScrollEnd(Float val) {
+        if (val > 0)
+            up();
+        else
+            down();
     }
 
     private void buttonUpdate(MyButton button) {
@@ -60,6 +76,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     }
 
 
+    //#region arrow keys
     private static final float initialDelay = 0.4f;
     private static final float intervalMin = 0;
     private static final float intervalMax = 0.4f;
@@ -105,7 +122,9 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         if (upPressed) up();
         else down();
     }
+    //#endregion
 
+    //#region getter setters
     private float stepSize = 1f;
 
     public NumericUpDown setStepSize(float _stepSize) {
@@ -116,7 +135,9 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     public MyTextBox getTextBox() {
         return this.tb;
     }
+    //#endregion
 
+    //#region value handling
     private int amountOfDecimalPlaces;
 
     public NumericUpDown setAmountOfDecimalPlaces(int zaza) {
@@ -137,6 +158,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
             text = "0";
         return Double.parseDouble(text);
     }
+    //#endregion
 
     private enum ButtonType {
         UP,
