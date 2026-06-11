@@ -3,6 +3,8 @@ package DeCell.FPG;
 import com.fs.starfarer.api.Global;
 import org.apache.log4j.Priority;
 
+import java.util.regex.Pattern;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
@@ -29,10 +31,17 @@ public class FancyPhaseGlow {
     public static void Log(String s) {
         Global.getLogger(FancyPhaseGlow.class).log(Priority.INFO, s);
     }
-    public static void LogWarn(String s){
+
+    public static void LogWarn(String s) {
         Global.getLogger(FancyPhaseGlow.class).log(Priority.WARN, s);
     }
-    public static void LogErr(String s){
+
+    public static void LogErr(String s) {
         Global.getLogger(FancyPhaseGlow.class).log(Priority.ERROR, s);
+    }
+
+    public static class Patterns {
+        public final static Pattern NUMBER_ONLY = Pattern.compile("[0-9]*");
+        public final static Pattern DECIMAL_ONLY = Pattern.compile("[0-9]*\\.?[0-9]*");
     }
 }

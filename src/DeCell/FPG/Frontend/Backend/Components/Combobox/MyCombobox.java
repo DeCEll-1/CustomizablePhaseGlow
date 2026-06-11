@@ -1,5 +1,6 @@
 package DeCell.FPG.Frontend.Backend.Components.Combobox;
 
+import DeCell.FPG.Frontend.Backend.BaseBuilder;
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Frontend.Backend.Components.MyButton;
 import DeCell.FPG.Frontend.Backend.Components.MyPanel;
@@ -103,7 +104,7 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
         panel.u.removeComponent(container.u);
     }
 
-    public static class Builder {
+    public static class Builder extends BaseBuilder<Builder> {
         private final float w;
         private final float h;
         //        private final MyButton button;
@@ -119,8 +120,9 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
             this.button = btnBuilder.setShape(w, h);
         }
 
-        public Builder position(Consumer<UIElement<?, ?>> zaza) {
-            zaza.accept(parent);
+        @Override
+        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<?>> zaza) {
+            zaza.accept(parent, this);
             button.position(zaza);
             return this;
         }

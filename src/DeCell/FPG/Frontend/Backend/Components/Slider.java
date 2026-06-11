@@ -15,18 +15,14 @@ import java.util.function.Consumer;
 
 public class Slider extends UIContainer<Slider, UIComponentAPI> {
 
-    // so the slider will need:
-    // a panel for rendering (aka the slider section)
-    // a handle
-    // onChange method that will give from 0-1
 
-    private static final float handleHeight = 22;
-    private static final float handleWidth = 18;
-    private static final float halfHandleWidth = handleWidth / 2;
-    private static final float sliderHeight = 16;
+    public static final float handleHeight = 22;
+    public static final float handleWidth = 18;
+    public static final float halfHandleWidth = handleWidth / 2;
+    public static final float sliderHeight = 16;
 
     // for the button to be centered
-    private static final float handleTLPadding = (handleHeight - sliderHeight) / 2;
+    public static final float handleTLPadding = (handleHeight - sliderHeight) / 2;
 
     public final MyPanel slider;
     public final MyButton handle;
@@ -162,6 +158,10 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
     //#endregion
 
 
+    // so the slider will need:
+    // a panel for rendering (aka the slider section)
+    // a handle
+    // onChange method that will give from 0-1
     public static class Builder extends BaseBuilder<Builder> {
 
         //        private final float h;
@@ -178,7 +178,7 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         }
 
         @Override
-        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<Builder>> zaza) {
+        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<?>> zaza) {
             zaza.accept(slider, this);
             // the position of the handle will be handled by the slider
             // slide manhandling handle lmao

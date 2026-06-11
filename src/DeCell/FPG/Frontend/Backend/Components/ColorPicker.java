@@ -14,6 +14,24 @@ import java.util.function.Consumer;
 import static DeCell.FPG.Frontend.Backend.DataPair.pair;
 
 public class ColorPicker extends UIContainer<ColorPicker, UIComponentAPI> {
+    //#region constants
+    public final static float sliderWidth = 160f;
+    public final static float previewWidth = 60f;
+
+    public final static float xPadding = 2f;
+    public final static float yPadding = 2f;
+
+    public final static float containerWidth = sliderWidth + xPadding + previewWidth;
+
+    public final static float containerHeight = (3 * Slider.sliderHeight) + (2 * xPadding);
+    public final static float containerHeightAlpha = (4 * Slider.sliderHeight) + (3 * xPadding);
+
+    public final static float previewHeight = containerHeight;
+    public final static float previewHeightAlpha = containerHeightAlpha;
+
+    public final static Color defaultColor = new Color(0xFFFFFF);
+    //#endregion
+
     private final MonoColorRenderable previewRenderer;
     private final Slider redSlider;
     private final Slider greenSlider;
@@ -38,6 +56,8 @@ public class ColorPicker extends UIContainer<ColorPicker, UIComponentAPI> {
         }
 
         updateSlidersColors();
+        updateSlidersColors(); // we do it twice because red and green only sees stuff thats updated before them so
+        // they dont update properly, doing it twice fixes that
     }
 
 
@@ -133,64 +153,57 @@ public class ColorPicker extends UIContainer<ColorPicker, UIComponentAPI> {
         private Slider alphaSlider;
         private boolean hasAlpha = false;
 
-        // --- Layout Constants ---
-        private final static float SLIDER_WIDTH = 160f;
-        private final static float SLIDER_WIDTH = 160f;
-        private final static float PREVIEW_WIDTH = 40f;
-
-        // Padding configurations
-        private final static float Y_PADDING = 2f;
-        private final static float X_PADDING = 2f;
-
-        // Container dimensions with alpha
-        private final static float containerWidthWithAlpha = 206; // 2 padding from sides
-        private final static float containerHeightWithAlpha = 78; // 4 sliders * 16 + 20 for 4 padding between sliders
-
-        // Container dimensions without alpha
-        private final static float CONTAINER_WIDTH = SLIDER_WIDTH + X_PADDING + PREVIEW_WIDTH + X_PADDING;
-        private final static float CONTAINER_HEIGHT = 56;
 
         public Builder withAlpha() {
             hasAlpha = true;
             return this;
         }
 
-        public ColorPicker build(MyPanel parent) {
+        public ColorPicker build(MyPanel parent, Color color) {
 
             MyPanel container = new MyPanel.Builder(
-                    hasAlpha ? containerWidthWithAlpha : CONTAINER_WIDTH,
-                    hasAlpha ? containerHeightWithAlpha : CONTAINER_HEIGHT
+                    containerWidth,
+                    hasAlpha ? containerHeightAlpha : containerHeight
             ).build(parent);
 
             MyPanel colorPreview = new MyPanel.Builder(
-                    PREVIEW_WIDTH,
-                    hasAlpha ? containerHeightWithAlpha - Y_PADDING : CONTAINER_HEIGHT - Y_PADDING
+                    previewWidth,
+                    hasAlpha ? previewHeightAlpha : previewHeight
             ).setPlugin(new RenderableHandlerPlugin()).build(container)
-                    .inTR(X_PADDING, Y_PADDING);
+                    .inTR(xPadding, yPadding);
 
-            Slider redSlider = new Slider.Builder(SLIDER_WIDTH, container)
-                    .position((item, builder) -> item.inTL(X_PADDING, Y_PADDING))
-                    .build()
-                    .addToSliderBackground(new QuadColorRenderable(new Color(0)));
+            Slider redSlider = new Slider.Builder(sliderWidth, container)
+                    .position((item, builder) -> item.inTL(xPadding, yPadding))
+                    .build().setSliderValue(color.getRed() / 255f)
+                    .addToSliderBackground(new QuadColorRenderable(color));
 
-            Slider greenSlider = new Slider.Builder(SLIDER_WIDTH, container).addSibling(redSlider)
-                    .position((item, builder) -> item.belowMid(builder.getSibling().u, Y_PADDING))
-                    .build()
-                    .addToSliderBackground(new QuadColorRenderable(new Color(0)));
+            Slider greenSlider = new Slider.Builder(sliderWidth, container).setSibling(redSlider)
+                    .position((item, builder) -> item.belowMid(builder.getSibling().u, yPadding))
+                    .build().setSliderValue(color.getBlue() / 255f)
+                    .addToSliderBackground(new QuadColorRenderable(color));
 
-            Slider blueSlider = new Slider.Builder(SLIDER_WIDTH, container).addSibling(greenSlider)
-                    .position((item, builder) -> item.belowMid(builder.getSibling().u, Y_PADDING))
-                    .build()
-                    .addToSliderBackground(new QuadColorRenderable(new Color(0)));
+            Slider blueSlider = new Slider.Builder(sliderWidth, container).setSibling(greenSlider)
+                    .position((item, builder) -> item.belowMid(builder.getSibling().u, yPadding))
+                    .build().setSliderValue(color.getGreen() / 255f)
+                    .addToSliderBackground(new QuadColorRenderable(color));
 
             if (hasAlpha) {
-                alphaSlider = new Slider.Builder(SLIDER_WIDTH, container).addSibling(blueSlider)
-                        .position((item, builder) -> item.belowMid(builder.getSibling().u, Y_PADDING))
-                        .build().setSliderValue(1)
-                        .addToSliderBackground(new QuadColorRenderable(new Color(0)));
+                alphaSlider = new Slider.Builder(sliderWidth, container).setSibling(blueSlider)
+                        .position((item, builder) -> item.belowMid(builder.getSibling().u, yPadding))
+                        .build().setSliderValue(color.getAlpha() / 255f)
+                        .addToSliderBackground(new QuadColorRenderable(color));
             }
 
             return new ColorPicker(container, colorPreview, redSlider, greenSlider, blueSlider, alphaSlider);
         }
+
+        public ColorPicker build(MyPanel parent, int col) {
+            return this.build(parent, new Color(col, hasAlpha));
+        }
+
+        public ColorPicker build(MyPanel parent) {
+            return this.build(parent, defaultColor);
+        }
+
     }
 }

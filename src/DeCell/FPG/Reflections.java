@@ -188,4 +188,31 @@ public class Reflections {
                     "' on " + target.getClass().getName(), t);
         }
     }
+
+    public static Object invokeMethod(String methodName, Object target, Class<?>[] parameterTypes, Object... args) {
+        if (target == null || methodName == null || methodName.isEmpty()) {
+            throw new IllegalArgumentException("Target object and method name cannot be null or empty");
+        }
+
+        // Default to empty arrays if null is passed to prevent NullPointerExceptions
+        Class<?>[] paramTypes = (parameterTypes != null) ? parameterTypes : new Class<?>[0];
+        Object[] methodArgs = (args != null) ? args : new Object[0];
+
+        try {
+            Class<?> clazz = target.getClass();
+
+            // 1. Get the Method object using the parameter types array
+            Object method = getMethodHandle.invoke(clazz, methodName, paramTypes);
+
+            // 2. Make it accessible in case it's private/protected
+            setMethodAccessable.invoke(method, true);
+
+            // 3. Invoke the method on the target, passing the arguments array
+            return invokeMethodHandle.invoke(method, target, methodArgs);
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed to invoke method '" + methodName +
+                    "' on " + target.getClass().getName() + " with the specified parameters.", t);
+        }
+    }
 }

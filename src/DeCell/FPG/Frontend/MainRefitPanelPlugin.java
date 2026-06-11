@@ -1,10 +1,12 @@
 package DeCell.FPG.Frontend;
 
+import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.*;
 import DeCell.FPG.Frontend.Backend.Components.*;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.combat.entities.Ship;
@@ -46,7 +48,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
                     MyButton debugButton = new MyButton.Builder("Debug", 190, 24, panel)
                             .setStyle(Alignment.MID, CutStyle.TOP)
-                            .position(s -> s.inBR(16, 4))
+                            .position((item, builder) -> item.inBR(16, 4))
                             .build().inMid();
 
                     new MyCombobox.Builder(
@@ -54,7 +56,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             new MyButton.Builder("Select Element")
                                     .setStyle(Alignment.MID, CutStyle.TOP),
                             panel
-                    ).position(s -> s.inTL(26, 30))
+                    ).position((item, builder) -> item.inTL(26, 30))
                             .build()
                             .addItem(new ComboboxElement("balls"))
                             .addItem(new ComboboxElement("balls2"))
@@ -70,8 +72,14 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             .setOnColorChange(s -> {
                                 MyButton dbgButton = s.getFromInternal("debug_btn");
                                 dbgButton.setText(s.getColor().toString());
-
                             });
+
+                    new MyTextBox.Builder(160, panel)
+                            .position((item, builder) -> item.inTR(26, 30)).build()
+                            .addToInternalData(pair("debug_btn", debugButton))
+                            .setOnTextChange(s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getText()))
+                            .setMaxChars(50).setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
+
 
                 });
     }
