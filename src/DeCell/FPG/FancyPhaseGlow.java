@@ -45,6 +45,8 @@ public class FancyPhaseGlow {
         public final static Pattern DECIMAL_ONLY = Pattern.compile("-?[0-9]*\\.?[0-9]*");
 
         public static Pattern decimalWithMaxDecimalPlaces(int decimalPlaces) {
+            if (decimalPlaces == 0)
+                return NUMBER_ONLY;
             return Pattern.compile("-?[0-9]*\\.?[0-9]{0," + decimalPlaces + "}");
         }
     }

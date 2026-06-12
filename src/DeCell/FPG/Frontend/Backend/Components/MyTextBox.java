@@ -6,14 +6,11 @@ import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
-import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
+import java.util.function.*;
 import java.util.regex.Pattern;
 
 import static DeCell.FPG.Reflections.invokeMethod;
@@ -65,30 +62,40 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
 
         String currentText = this.u.getText();
 
-        if (!Objects.equals(currentText, textLastFrame)) {
-            if (validationPattern != null && currentText != null) {
-                Matcher matcher = validationPattern.matcher(currentText);
+        if (Objects.equals(currentText, textLastFrame))
+            return;
 
-                if (!matcher.matches()) {
-                    this.u.setText(textLastFrame);
+        if (currentText.isEmpty())
+            currentText = "";
 
-                    // TODO: if we manage to get sound setting for text fields update this
-                    Global.getSoundPlayer().playUISound("ui_typer_buzz", 1, 2);
-                    return;
-                }
-            }
+        boolean isValid =
+                (validationPattern == null || validationPattern.matcher(currentText).matches())
+                        && (validator == null || validator.test(currentText));
 
-            if (onTextChange != null)
-                onTextChange.accept(this);
+        if (!isValid) {
+            revertText();
+            revertText();
+            return;
         }
 
         textLastFrame = currentText;
 
+        if (onTextChange != null) {
+            onTextChange.accept(this);
+        }
+    }
+
+    private void revertText() {
+        this.u.setText(textLastFrame);
+        this.setText(textLastFrame);
+        Global.getSoundPlayer().playUISound("ui_typer_buzz", 1, 2);
     }
 
     private Consumer<MyTextBox> onFocusEnter;
     private Consumer<MyTextBox> onFocusExit;
     private Consumer<MyTextBox> onTextChange;
+    private Predicate<String> validator = text -> true;
+
     protected Pattern validationPattern = null;
 
     public MyTextBox setOnFocusEnter(Consumer<MyTextBox> onFocusEnter) {
@@ -103,6 +110,11 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
 
     public MyTextBox setOnTextChange(Consumer<MyTextBox> onTextChange) {
         this.onTextChange = onTextChange;
+        return this;
+    }
+
+    public MyTextBox setTextValidator(Predicate<String> validator) {
+        this.validator = validator;
         return this;
     }
 

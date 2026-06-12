@@ -3,6 +3,7 @@ package DeCell.FPG.Frontend.Backend.Components;
 import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
 import DeCell.FPG.Frontend.Backend.Components.Gears.Scroll;
+import DeCell.FPG.Frontend.Backend.Components.Gears.UpDownArrow;
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Helpers.ElapsingInterval;
 import DeCell.FPG.Misc;
@@ -25,6 +26,9 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     private final MyTextBox tb;
     private final MyButton up;
     private final MyButton down;
+    private final UpDownArrow upDownArrowGear;
+    // TODO: allow users to hold down left click on the buttons for changing the value
+    // TODO: add sounds for inputs
 
     public NumericUpDown(MyPanel _container, MyTextBox _tb, MyButton _up, MyButton _down) {
         super(_container.u);
@@ -35,11 +39,17 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         this.down = _down;
 
         tb.setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
+        tb.setTextValidator((t) -> {
+            double newVal = getValueForString(t);
+            if (newVal < minValue || newVal > maxValue)
+                return false;
+            return true;
+        });
 
         this.setValue(0);
 
-        up.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", ButtonType.UP));
-        down.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", ButtonType.DOWN));
+        up.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.UP));
+        down.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.DOWN));
 
 
         Scroll scrollGear = new Scroll();
@@ -47,6 +57,14 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         up.setOnHover(scrollGear::onHover);
         down.setOnHover(scrollGear::onHover);
         scrollGear.addScrollListener(this::onScrollEnd);
+
+        this.upDownArrowGear = new UpDownArrow(intervalMin, intervalMax, initialDelay);
+        upDownArrowGear.addUpDownListener(s -> {
+            switch (s) {
+                case UP -> up();
+                case DOWN -> down();
+            }
+        });
 
         setAmountOfDecimalPlaces(2);
     }
@@ -59,7 +77,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     }
 
     private void buttonUpdate(MyButton button) {
-        ButtonType type = button.getFromInternal("type");
+        UpDownArrow.ButtonType type = button.getFromInternal("type");
 
         switch (type) {
             case UP -> up();
@@ -80,42 +98,14 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     private static final float initialDelay = 0.4f;
     private static final float intervalMin = 0;
     private static final float intervalMax = 0.4f;
-    private final ElapsingInterval keyPressInterval = new ElapsingInterval(intervalMin, intervalMax);
-    private float holdTime = 0;
 
     @Override
     public void processInput(List<InputEventAPI> events) {
         if (!tb.u.hasFocus()) {
-            keyPressInterval.setElapsed(0);
             return;
         }
 
-        boolean upPressed = Keyboard.isKeyDown(Keyboard.KEY_UP);
-        boolean downPressed = Keyboard.isKeyDown(Keyboard.KEY_DOWN);
-        if (upPressed || downPressed) {
-            float deltaTime = Global.getCombatEngine().getElapsedInLastFrame();
-
-            if (holdTime == 0)
-                handleArrowKeys(upPressed);
-            holdTime += deltaTime;
-
-            if (holdTime < initialDelay)
-                return;
-
-
-            keyPressInterval.advance(deltaTime);
-
-            keyPressInterval.setInterval(intervalMin,
-                    intervalMax - Misc.clamp(EasingFunctions.Linear(holdTime * 0.1f), 0, intervalMax - 0.05f));
-
-            if (keyPressInterval.isElapsed()) {
-                handleArrowKeys(upPressed);
-            }
-        } else {
-            keyPressInterval.setInterval(intervalMin, intervalMax);
-            keyPressInterval.setElapsed(0);
-            holdTime = 0;
-        }
+        upDownArrowGear.advance();
     }
 
     private void handleArrowKeys(boolean upPressed) {
@@ -139,6 +129,8 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
 
     //#region value handling
     private int amountOfDecimalPlaces;
+    private double maxValue = Double.MAX_VALUE;
+    private double minValue = -Double.MAX_VALUE; // MIN_VALUE isnt actually the minimum value, thanks java
 
     public NumericUpDown setAmountOfDecimalPlaces(int zaza) {
         this.amountOfDecimalPlaces = zaza;
@@ -146,24 +138,30 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         return this;
     }
 
+    public NumericUpDown setMinMax(double min, double max) {
+        this.minValue = min;
+        this.maxValue = max;
+        return this;
+    }
+
     public NumericUpDown setValue(double val) {
+        val = Misc.clamp(val, minValue, maxValue);
         String text = String.format("%." + amountOfDecimalPlaces + "f", val);
         this.tb.setText(text);
         return this;
     }
 
     public double getValue() {
-        String text = this.tb.getText();
+        return getValueForString(this.tb.getText());
+    }
+
+    private double getValueForString(String text) {
         if (text == null || text.isEmpty())
             text = "0";
         return Double.parseDouble(text);
     }
     //#endregion
 
-    private enum ButtonType {
-        UP,
-        DOWN
-    }
 
     // this wwill be a regular ass winforms numeric up down, it must have 2 buttons for up down
     // properties such as:
