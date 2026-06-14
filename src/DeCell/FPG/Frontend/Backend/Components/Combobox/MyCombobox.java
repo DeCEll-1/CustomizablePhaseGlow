@@ -70,9 +70,8 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
             CutStyle style = i == elements.size() - 1 ? CutStyle.BOTTOM : CutStyle.NONE;
             float topPadding = i * paddedHeight + 2;
             new MyButton.Builder(element.text, w, itemHeight, container)
-                    .setPositionData(new Vector2f(0, topPadding))
-                    .position((el, b) -> el.inTL(b.getPosition()))
                     .setStyle(Alignment.MID, style).build()
+                    .inTL(new Vector2f(0, topPadding))
                     .setCustomData(element.data)
                     .addToInternalData(pair("index", i))
                     .setOnMouseDown(b ->
@@ -87,8 +86,8 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
         }
         ComboboxElement element = elements.get(index);
         if (button != null && button.u != null) {
-            button.u.setText(element.text);
-            button.u.setCustomData(element.data);
+            button.setText(element.text);
+            button.setCustomData(element.data);
         }
         if (onChange != null) {
             onChange.accept(this, element);

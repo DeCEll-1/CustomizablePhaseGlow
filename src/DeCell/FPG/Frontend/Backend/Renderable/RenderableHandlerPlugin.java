@@ -22,6 +22,10 @@ public class RenderableHandlerPlugin extends PanelPlugin {
         return renderBelows;
     }
 
+    public <T extends PluginRenderable> T getRenderBelow(int index) {
+        return (T) renderBelows.get(index);
+    }
+
     public RenderableHandlerPlugin addAbove(PluginRenderable _0) {
         renderAboves.add(_0);
         return this;
@@ -31,6 +35,9 @@ public class RenderableHandlerPlugin extends PanelPlugin {
         return renderAboves;
     }
 
+    public <T extends PluginRenderable> T getRenderAbove(int index) {
+        return (T) renderAboves.get(index);
+    }
 
     @Override
     public void init(CustomPanelAPI parent) {

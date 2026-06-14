@@ -3,10 +3,11 @@ package DeCell.FPG.Frontend;
 import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.*;
 import DeCell.FPG.Frontend.Backend.Components.*;
+import DeCell.FPG.Frontend.Backend.Components.ColorPicker.Adapters.RgbColorPickerAdapter;
+import DeCell.FPG.Frontend.Backend.Components.ColorPicker.ColorPickerV2;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.combat.entities.Ship;
@@ -48,8 +49,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
                     MyButton debugButton = new MyButton.Builder("Debug", 190, 24, panel)
                             .setStyle(Alignment.MID, CutStyle.TOP)
-                            .position((item, builder) -> item.inBR(16, 4))
-                            .build().inMid();
+                            .build().inBR(16, 4);
 
                     MyCombobox.Builder.build(
                                     190, 25,
@@ -64,16 +64,9 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             })
                     ;
 
-
-                    ColorPicker chud = new ColorPicker.Builder().withAlpha().build(panel).inBL(20, 20)
-                            .addToInternalData(pair("debug_btn", debugButton))
-                            .setOnColorChange(s -> {
-                                MyButton dbgButton = s.getFromInternal("debug_btn");
-                                dbgButton.setText(s.getColor().toString());
-                            });
-
                     MyTextBox testTB = new MyTextBox.Builder(160, panel)
-                            .position((item, builder) -> item.inTR(50, 50)).build()
+                            .build()
+                            .inTR(50, 50)
                             .addToInternalData(pair("debug_btn", debugButton))
                             .setOnTextChange(s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getText()))
                             .setMaxChars(50).setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
@@ -82,6 +75,8 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             .belowRight(testTB.getParent().u, 2)
                             .setAmountOfDecimalPlaces(0)
                             .setMinMax(0, 255);
+
+                    new ColorPickerV2.Builder().build(panel).setAdapter(new RgbColorPickerAdapter()).inMid();
 
 
                 });

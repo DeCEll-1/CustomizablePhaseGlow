@@ -2,11 +2,13 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
+import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Mouse;
 
@@ -15,31 +17,40 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class MyButton extends UIElement<MyButton, ButtonAPI> {
+public class MyButton extends UIContainer<MyButton, UIComponentAPI> {
 
-    public MyButton(String text, float width, float height, float pad, MyTooltip _parent) {
-        super(_parent.addButton(text, null, width, height, pad));
-        _parent.addElement(this);
-        this.parent = _parent;
+    private ButtonAPI btn;
+
+    public ButtonAPI getButton() {
+        return btn;
     }
 
-    public MyButton(String text, Color base, Color bg,
-                    float width, float height, float pad, MyTooltip _parent) {
-        super(_parent.addButton(text, null, base, bg, width, height, pad));
+    private MyButton(String text, float width, float height, float pad, MyTooltip _parent) {
+        super(_parent.u);
         _parent.addElement(this);
         this.parent = _parent;
+        btn = _parent.addButton(text, null, width, height, pad);
     }
 
-    public MyButton(String text, Color base, Color bg,
-                    Alignment align, CutStyle style,
-                    float width, float height, float pad, MyTooltip _parent) {
-        super(_parent.addButton(text, null, base, bg, align, style, width, height, pad));
+    private MyButton(String text, Color base, Color bg,
+                     float width, float height, float pad, MyTooltip _parent) {
+        super(_parent.u);
         _parent.addElement(this);
         this.parent = _parent;
+        btn = _parent.addButton(text, null, base, bg, width, height, pad);
     }
 
-    public MyButton(String text, Alignment align, CutStyle style,
-                    float width, float height, float pad, MyTooltip parent) {
+    private MyButton(String text, Color base, Color bg,
+                     Alignment align, CutStyle style,
+                     float width, float height, float pad, MyTooltip _parent) {
+        super(_parent.u);
+        _parent.addElement(this);
+        this.parent = _parent;
+        btn = _parent.addButton(text, null, base, bg, align, style, width, height, pad);
+    }
+
+    private MyButton(String text, Alignment align, CutStyle style,
+                     float width, float height, float pad, MyTooltip parent) {
         this(text, Misc.getButtonTextColor(), Misc.getDarkPlayerColor(),
                 align, style, width, height, pad, parent);
     }
@@ -53,120 +64,120 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
         super.advance(amount);
     }
 
-//#region button functions
+    //#region button functions
 
     public MyButton setShortcut(int key, boolean putLast) {
-        u.setShortcut(key, putLast);
+        btn.setShortcut(key, putLast);
         return this;
     }
 
     public MyButton setEnabled(boolean enabled) {
-        u.setEnabled(enabled);
+        btn.setEnabled(enabled);
         return this;
     }
 
     public MyButton setButtonPressedSound(String buttonPressedSound) {
-        u.setButtonPressedSound(buttonPressedSound);
+        btn.setButtonPressedSound(buttonPressedSound);
         return this;
     }
 
     public MyButton setMouseOverSound(String mouseOverSound) {
-        u.setMouseOverSound(mouseOverSound);
+        btn.setMouseOverSound(mouseOverSound);
         return this;
     }
 
     public MyButton setButtonDisabledPressedSound(String buttonDisabledPressedSound) {
-        u.setButtonDisabledPressedSound(buttonDisabledPressedSound);
+        btn.setButtonDisabledPressedSound(buttonDisabledPressedSound);
         return this;
     }
 
     public MyButton setChecked(boolean checked) {
-        u.setChecked(checked);
+        btn.setChecked(checked);
         return this;
     }
 
     public MyButton highlight() {
-        u.highlight();
+        btn.highlight();
         return this;
     }
 
     public MyButton unhighlight() {
-        u.unhighlight();
+        btn.unhighlight();
         return this;
     }
 
     public MyButton setHighlightBrightness(float highlightBrightness) {
-        u.setHighlightBrightness(highlightBrightness);
+        btn.setHighlightBrightness(highlightBrightness);
         return this;
     }
 
     public MyButton setQuickMode(boolean quickMode) {
-        u.setQuickMode(quickMode);
+        btn.setQuickMode(quickMode);
         return this;
     }
 
     public MyButton setClickable(boolean clickable) {
-        u.setClickable(clickable);
+        btn.setClickable(clickable);
         return this;
     }
 
     public MyButton setGlowBrightness(float glowBrightness) {
-        u.setGlowBrightness(glowBrightness);
+        btn.setGlowBrightness(glowBrightness);
         return this;
     }
 
     public MyButton setText(String text) {
-        u.setText(text);
+        btn.setText(text);
         return this;
     }
 
     public MyButton setSkipPlayingPressedSoundOnce(boolean skipPlayingPressedSoundOnce) {
-        u.setSkipPlayingPressedSoundOnce(skipPlayingPressedSoundOnce);
+        btn.setSkipPlayingPressedSoundOnce(skipPlayingPressedSoundOnce);
         return this;
     }
 
     public MyButton setHighlightBounceDown(boolean b) {
-        u.setHighlightBounceDown(b);
+        btn.setHighlightBounceDown(b);
         return this;
     }
 
     public MyButton setShowTooltipWhileInactive(boolean showTooltipWhileInactive) {
-        u.setShowTooltipWhileInactive(showTooltipWhileInactive);
+        btn.setShowTooltipWhileInactive(showTooltipWhileInactive);
         return this;
     }
 
     public MyButton setRightClicksOkWhenDisabled(boolean rightClicksOkWhenDisabled) {
-        u.setRightClicksOkWhenDisabled(rightClicksOkWhenDisabled);
+        btn.setRightClicksOkWhenDisabled(rightClicksOkWhenDisabled);
         return this;
     }
 
     public MyButton setFlashBrightness(float flashBrightness) {
-        u.setFlashBrightness(flashBrightness);
+        btn.setFlashBrightness(flashBrightness);
         return this;
     }
 
     public MyButton flash(boolean withSound, float in, float out) {
-        u.flash(withSound, in, out);
+        btn.flash(withSound, in, out);
         return this;
     }
 
     public MyButton flash(boolean withSound) {
-        u.flash(withSound);
+        btn.flash(withSound);
         return this;
     }
 
     public MyButton flash() {
-        u.flash();
+        btn.flash();
         return this;
     }
 
     public MyButton setPerformActionWhenDisabled(boolean performActionWhenDisabled) {
-        u.setPerformActionWhenDisabled(performActionWhenDisabled);
+        btn.setPerformActionWhenDisabled(performActionWhenDisabled);
         return this;
     }
 
     public MyButton setCustomData(Object customData) {
-        u.setCustomData(customData);
+        btn.setCustomData(customData);
         return this;
     }
     //#endregion
@@ -218,18 +229,6 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
             return this;
         }
 
-        @Override
-        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<?>> zaza) {
-            zaza.accept(parent, this);
-            return this;
-        }
-
-
-        public Builder modifyParent(Consumer<MyTooltip> zaza) { // needed for when you input panel and need to update the tooltips properties
-            zaza.accept(parent);
-            return this;
-        }
-
         public Builder setPad(float pad) {
             this.pad = pad;
             return this;
@@ -254,19 +253,22 @@ public class MyButton extends UIElement<MyButton, ButtonAPI> {
         }
 
         public MyButton build() {
-            if (baseColor != null && bgColor != null && alignment != null && cutStyle != null) {
-                return new MyButton(text, baseColor, bgColor, alignment, cutStyle, w, h, pad, parent);
+            MyButton btn = null;
+            if (baseColor != null && bgColor != null && alignment != null && cutStyle != null && btn == null) {
+                btn = new MyButton(text, baseColor, bgColor, alignment, cutStyle, w, h, pad, parent);
             }
 
-            if (baseColor != null && bgColor != null) {
-                return new MyButton(text, baseColor, bgColor, w, h, pad, parent);
+            if (baseColor != null && bgColor != null && btn == null) {
+                btn = new MyButton(text, baseColor, bgColor, w, h, pad, parent);
             }
 
-            if (alignment != null && cutStyle != null) {
-                return new MyButton(text, alignment, cutStyle, w, h, pad, parent);
+            if (alignment != null && cutStyle != null && btn == null) {
+                btn = new MyButton(text, alignment, cutStyle, w, h, pad, parent);
             }
 
-            return new MyButton(text, w, h, pad, parent);
+            if (btn == null)
+                btn = new MyButton(text, w, h, pad, parent);
+            return btn;
         }
 
     }

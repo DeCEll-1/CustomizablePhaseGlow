@@ -50,27 +50,28 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
 
     private void createContainer() {
         activeUIElements.clear();
-        this.container = new MyPanel(this.w(), this.h(), new MultiPluginHandler() // main window
-                .add(new RenderableHandlerPlugin()
-                        .addBelow(
-                                // TODO: make these more modifyable
-                                new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"), 32)
-                                        .setPadding(-8).setRenderInside(true))
-                ).add(new LambdaUIPanelPlugin()
-                        .onProcessInput(e -> {
-                                    if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
-                                        this.click();
-                                    e.forEach($_ -> {
-                                        $_.consume();
-                                    });
-                                }
+        this.container = new MyPanel.Builder(this.w(), this.h())
+                .setPlugin(new MultiPluginHandler() // main window
+                        .add(new RenderableHandlerPlugin()
+                                .addBelow(
+                                        // TODO: make these more modifyable
+                                        new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"), 32)
+                                                .setPadding(-8).setRenderInside(true))
+                        ).add(new LambdaUIPanelPlugin()
+                                .onProcessInput(e -> {
+                                            if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
+                                                this.click();
+                                            e.forEach($_ -> {
+                                                $_.consume();
+                                            });
+                                        }
+                                )
                         )
-                ), this.u).addTo(UIElements).inBL(0, 0);
+                )
+                .build(this.u).inBL(0, 0).addTo(UIElements);
 
 
-        MyTooltip exitTooltip = new MyTooltip(24, 24, false, container).addTo(UIElements).inTR(26, 16);
-        new MyButton("X", 24, 24, 0, exitTooltip).
-                setOnMouseDown(this::click).addTo(UIElements);
+        new MyButton.Builder("X", 24, 24, container).build().inTR(26, 16);
     }
 
     public DialougeButtonPanel(CustomPanelAPI underlying) {

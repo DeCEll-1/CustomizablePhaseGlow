@@ -1,9 +1,11 @@
 package DeCell.FPG;
 
 import DeCell.FPG.Enums.ShaderType;
+import com.fs.starfarer.api.Global;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
+import java.io.IOException;
 import java.nio.FloatBuffer;
 
 public class Shader {
@@ -26,7 +28,21 @@ public class Shader {
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
         this.name = name != null ? name : "";
+    }
 
+    public static Shader fromFile(String vertexSource, String fragmentSource) {
+        return fromFile(vertexSource, fragmentSource, "");
+    }
+
+    public static Shader fromFile(String vertexSource, String fragmentSource, String name) {
+        Shader shader = null;
+        try {
+            String vert = Global.getSettings().loadText(vertexSource);
+            String frag = Global.getSettings().loadText(fragmentSource);
+            shader = new Shader(vert, frag, name).init();
+        } catch (IOException e) {
+        }
+        return shader;
     }
 
     public Shader init() {

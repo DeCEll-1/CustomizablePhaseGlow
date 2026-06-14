@@ -5,18 +5,14 @@ import DeCell.FPG.Frontend.Backend.BaseBuilder;
 import DeCell.FPG.Frontend.Backend.Components.Gears.Scroll;
 import DeCell.FPG.Frontend.Backend.Components.Gears.UpDownArrow;
 import DeCell.FPG.Frontend.Backend.UIContainer;
-import DeCell.FPG.Helpers.ElapsingInterval;
 import DeCell.FPG.Misc;
-import Kryz.Tweening.EasingFunctions;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static DeCell.FPG.FancyPhaseGlow.Patterns.decimalWithMaxDecimalPlaces;
 import static DeCell.FPG.Frontend.Backend.DataPair.pair;
@@ -46,7 +42,11 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
             return true;
         });
 
-        this.setValue(0);
+        tb.setOnTextChange((text) -> {
+            if (onChange != null) onChange.accept(this);
+        });
+
+        this.setValue(0, false);
 
         up.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.UP));
         down.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.DOWN));
@@ -86,11 +86,11 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     }
 
     private void up() {
-        this.setValue(this.getValue() + stepSize);
+        this.setValue(this.getValue() + stepSize, true);
     }
 
     private void down() {
-        this.setValue(this.getValue() - stepSize);
+        this.setValue(this.getValue() - stepSize, true);
     }
 
 
@@ -101,7 +101,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
 
     @Override
     public void processInput(List<InputEventAPI> events) {
-        if (!tb.u.hasFocus()) {
+        if (!tb.hasFocus()) {
             return;
         }
 
@@ -125,17 +125,16 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     public MyTextBox getTextBox() {
         return this.tb;
     }
-    //#endregion
 
-    //#region value handling
-    private int amountOfDecimalPlaces;
     private double maxValue = Double.MAX_VALUE;
     private double minValue = -Double.MAX_VALUE; // MIN_VALUE isnt actually the minimum value, thanks java
 
-    public NumericUpDown setAmountOfDecimalPlaces(int zaza) {
-        this.amountOfDecimalPlaces = zaza;
-        this.tb.setValidationRegex(decimalWithMaxDecimalPlaces(amountOfDecimalPlaces));
-        return this;
+    public double getMaxValue() {
+        return maxValue;
+    }
+
+    public double getMinValue() {
+        return minValue;
     }
 
     public NumericUpDown setMinMax(double min, double max) {
@@ -143,16 +142,39 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
         this.maxValue = max;
         return this;
     }
+    //#endregion
 
-    public NumericUpDown setValue(double val) {
+    //#region value handling
+    private int amountOfDecimalPlaces;
+
+    public NumericUpDown setAmountOfDecimalPlaces(int zaza) {
+        this.amountOfDecimalPlaces = zaza;
+        this.tb.setValidationRegex(decimalWithMaxDecimalPlaces(amountOfDecimalPlaces));
+        return this;
+    }
+
+    public NumericUpDown setValue(double val, boolean triggerOnChange) {
         val = Misc.clamp(val, minValue, maxValue);
         String text = String.format("%." + amountOfDecimalPlaces + "f", val);
-        this.tb.setText(text);
+        this.tb.setText(text, false);
+
+        if (onChange != null && triggerOnChange) {
+            onChange.accept(this);
+        }
+        return this;
+    }
+
+    public NumericUpDown setValueNormalised(double val) {
+        setValue(val * (maxValue - minValue) + minValue, false);
         return this;
     }
 
     public double getValue() {
         return getValueForString(this.tb.getText());
+    }
+
+    public double getValueNormalised() {
+        return (getValue() - minValue) / (maxValue - minValue);
     }
 
     private double getValueForString(String text) {
@@ -162,6 +184,12 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     }
     //#endregion
 
+    private Consumer<NumericUpDown> onChange = null;
+
+    public NumericUpDown setOnChange(Consumer<NumericUpDown> listener) {
+        this.onChange = listener;
+        return this;
+    }
 
     // this wwill be a regular ass winforms numeric up down, it must have 2 buttons for up down
     // properties such as:
@@ -171,7 +199,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     public static class Builder extends BaseBuilder<Builder> {
 
         //#region constants
-        public final static float xPadding = 2f;
+        public final static float xPadding = 0f;
         public final static float yPadding = 2f;
 
         public final static float buttonWidth = 16;
@@ -188,17 +216,15 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
             MyPanel container = new MyPanel.Builder(w, tbHeight).build(parent);
 
             MyTextBox tb = new MyTextBox.Builder(tbWidth, tbHeight, container)
-                    .position((item, builder) -> item.inTL(0, 0)).build();
+                    .build().inTL(0, 0);
 
             MyButton upButton = new MyButton.Builder("", buttonWidth, buttonHeight, container)
-                    .position((i, b) -> i.inTR(0, 0))
                     .setStyle(Alignment.MID, CutStyle.TOP)
-                    .build();
+                    .build().inTR(0, 0);
 
             MyButton downButton = new MyButton.Builder("", buttonWidth, buttonHeight, container)
-                    .position((i, b) -> i.inBR(0, 0))
                     .setStyle(Alignment.MID, CutStyle.BOTTOM)
-                    .build();
+                    .build().inBR(0, 0);
 
             return new NumericUpDown(container, tb, upButton, downButton);
         }

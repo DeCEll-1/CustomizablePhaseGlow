@@ -6,6 +6,7 @@ import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import java.awt.*;
 import java.util.List;
@@ -15,28 +16,37 @@ import java.util.regex.Pattern;
 
 import static DeCell.FPG.Reflections.invokeMethod;
 
-public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
+public class MyTextBox extends UIContainer<MyTextBox, UIComponentAPI> {
     //#region constants
     public static final float defaultHeight = 28f;
     public static final String defaultFont = "graphics/fonts/insignia21LTaa.fnt";
+    private boolean ignoreNextTextChangeTrigger = false;
     //#endregion
+    private final TextFieldAPI textField;
+
+    public TextFieldAPI getTExtField() {
+        return textField;
+    }
 
     public MyTextBox(float w, float pad, MyTooltip _parent) {
-        super(_parent.addTextField(w, pad));
+        super(_parent.u);
         _parent.addElement(this);
         this.parent = _parent;
+        textField = _parent.addTextField(w, pad);
     }
 
     public MyTextBox(float w, String font, float pad, MyTooltip _parent) {
-        super(_parent.addTextField(w, font, pad));
+        super(_parent.u);
         _parent.addElement(this);
         this.parent = _parent;
+        textField = _parent.addTextField(w, font, pad);
     }
 
     public MyTextBox(float w, float h, String font, float pad, MyTooltip _parent) {
-        super(_parent.addTextField(w, h, font, pad));
+        super(_parent.u);
         _parent.addElement(this);
         this.parent = _parent;
+        textField = _parent.addTextField(w, h, font, pad);
     }
 
     protected boolean hadFocusLastFrame = false;
@@ -46,7 +56,7 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
     public void processInput(List<InputEventAPI> events) {
         super.processInput(events);
 
-        boolean currentlyHavesFocus = this.u.hasFocus();
+        boolean currentlyHavesFocus = this.textField.hasFocus();
 
         if (currentlyHavesFocus && !hadFocusLastFrame)
             // we captured focus
@@ -60,7 +70,7 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
 
         hadFocusLastFrame = currentlyHavesFocus;
 
-        String currentText = this.u.getText();
+        String currentText = this.textField.getText();
 
         if (Objects.equals(currentText, textLastFrame))
             return;
@@ -80,14 +90,15 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
 
         textLastFrame = currentText;
 
-        if (onTextChange != null) {
+        if (onTextChange != null && !this.ignoreNextTextChangeTrigger) {
             onTextChange.accept(this);
         }
+        this.ignoreNextTextChangeTrigger = false;
     }
 
     private void revertText() {
-        this.u.setText(textLastFrame);
-        this.setText(textLastFrame);
+        this.textField.setText(textLastFrame);
+        this.setText(textLastFrame, false);
         Global.getSoundPlayer().playUISound("ui_typer_buzz", 1, 2);
     }
 
@@ -145,97 +156,102 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
     }
 
     public MyTextBox setPad(float pad) {
-        this.u.setPad(pad);
+        this.textField.setPad(pad);
         return this;
     }
 
     public MyTextBox setMidAlignment() {
-        this.u.setMidAlignment();
+        this.textField.setMidAlignment();
         return this;
     }
 
     public MyTextBox setColor(Color color) {
-        this.u.setColor(color);
+        this.textField.setColor(color);
         return this;
     }
 
     public MyTextBox setBgColor(Color bgColor) {
-        this.u.setBgColor(bgColor);
+        this.textField.setBgColor(bgColor);
         return this;
     }
 
     public String getText() {
-        return this.u.getText();
+        return this.textField.getText();
     }
 
-    public MyTextBox setText(String string) {
-        this.u.setText(string);
+    public MyTextBox setText(String string, boolean triggerOnChange) {
+        this.textField.setText(string);
+        this.ignoreNextTextChangeTrigger = !triggerOnChange;
         return this;
     }
 
     public MyTextBox setLimitByStringWidth(boolean limitByStringWidth) {
-        this.u.setLimitByStringWidth(limitByStringWidth);
+        this.textField.setLimitByStringWidth(limitByStringWidth);
         return this;
     }
 
     public MyTextBox setMaxChars(int maxChars) {
-        this.u.setMaxChars(maxChars);
+        this.textField.setMaxChars(maxChars);
         return this;
     }
 
     public MyTextBox deleteAll() {
-        this.u.deleteAll();
+        this.textField.deleteAll();
         return this;
     }
 
     public MyTextBox deleteAll(boolean withSound) {
-        this.u.deleteAll(withSound);
+        this.textField.deleteAll(withSound);
         return this;
     }
 
     public MyTextBox deleteLastWord() {
-        this.u.deleteLastWord();
+        this.textField.deleteLastWord();
         return this;
     }
 
     public MyTextBox grabFocus() {
-        this.u.grabFocus();
+        this.textField.grabFocus();
         return this;
     }
 
     public MyTextBox grabFocus(boolean playSound) {
-        this.u.grabFocus(playSound);
+        this.textField.grabFocus(playSound);
         return this;
     }
 
     public MyTextBox setUndoOnEscape(boolean undoOnEscape) {
-        this.u.setUndoOnEscape(undoOnEscape);
+        this.textField.setUndoOnEscape(undoOnEscape);
         return this;
     }
 
     public MyTextBox setHandleCtrlV(boolean handleCtrlV) {
-        this.u.setHandleCtrlV(handleCtrlV);
+        this.textField.setHandleCtrlV(handleCtrlV);
         return this;
     }
 
     public MyTextBox setBorderColor(Color borderColor) {
-        this.u.setBorderColor(borderColor);
+        this.textField.setBorderColor(borderColor);
         return this;
     }
 
     public MyTextBox setVerticalCursor(boolean verticalCursor) {
-        this.u.setVerticalCursor(verticalCursor);
+        this.textField.setVerticalCursor(verticalCursor);
         return this;
     }
 
     public MyTextBox hideCursor() {
-        this.u.hideCursor();
+        this.textField.hideCursor();
         return this;
     }
 
     public MyTextBox showCursor() {
-        this.u.showCursor();
+        this.textField.showCursor();
         return this;
+    }
+
+    public boolean hasFocus() {
+        return textField.hasFocus();
     }
 
     //#endregion
@@ -272,14 +288,10 @@ public class MyTextBox extends UIContainer<MyTextBox, TextFieldAPI> {
             return this;
         }
 
-        @Override
-        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<?>> zaza) {
-            zaza.accept(parent, this);
-            return this;
-        }
-
         public MyTextBox build() {
-            return new MyTextBox(w, h, font, pad, parent);
+            MyTextBox tb = new MyTextBox(w, h, font, pad, parent);
+            tb.textField.getPosition().inTL(0, 0);
+            return tb;
         }
 
     }

@@ -2,7 +2,6 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
 import DeCell.FPG.Frontend.Backend.Components.Gears.Scroll;
-import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
 import DeCell.FPG.Frontend.Backend.Renderable.PluginRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.Frontend.Backend.UIContainer;
@@ -19,11 +18,12 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
 
     public static final float handleHeight = 22;
     public static final float handleWidth = 18;
-    public static final float halfHandleWidth = handleWidth / 2;
-    public static final float sliderHeight = 16;
+    public static final float halfHandleWidth = handleWidth - (handleWidth / 4f);
+    // TODO: make this height adjustable
+    public static final float defaultHeight = 16;
 
     // for the button to be centered
-    public static final float handleTLPadding = (handleHeight - sliderHeight) / 2;
+    public static final float handleTLPadding = -(handleHeight - defaultHeight) / 2;
 
     public final MyPanel slider;
     public final MyButton handle;
@@ -46,7 +46,6 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         handle.inTL(0 - halfHandleWidth, handleTLPadding);
 
         renderableHandlerPlugin = renderPlugin;
-
     }
 
 
@@ -79,9 +78,13 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
     }
 
     public void updateHandle() {
+        updateHandle(true);
+    }
+
+    public void updateHandle(boolean triggerOnChange) {
         handleRelativeX = Misc.clamp(handleRelativeX, 0, slider.w());
         handle.inTL(handleRelativeX - halfHandleWidth, handleTLPadding);
-        if (onChange != null)
+        if (onChange != null && triggerOnChange)
             onChange.accept(this);
     }
 
@@ -93,14 +96,14 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
     }
 
     // from 0-1, 0 at the start of the slider and 1 at the end of the slider
-    public float getSliderValue() {
+    public float getValue() {
         return Misc.clamp(handleRelativeX / slider.w(), 0, 1);
     }
 
     // zaza must be from 0-1
     public Slider setSliderValue(float zaza) {
         this.handleRelativeX = slider.w() * zaza;
-        updateHandle();
+        updateHandle(false);
         return this;
     }
     //#endregion
@@ -113,7 +116,7 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         float mouseX = Mouse.getX() + halfHandleWidth;
 
         handleRelativeX = Mouse.getX() - slider.x();
-        updateHandle();
+        updateHandle(false); // the button itself will trigger on click
     }
 
     //#endregion
@@ -132,18 +135,10 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
 
         public Builder(float w, MyPanel parent) {
 
-            this.slider = new MyPanel.Builder(w, sliderHeight).
+            this.slider = new MyPanel.Builder(w, defaultHeight).
                     setPlugin(renderableHandlerPlugin).build(parent);
 
             this.handle = new MyButton.Builder("", handleWidth, handleHeight, slider);
-        }
-
-        @Override
-        public Builder position(BiConsumer<UIElement<?, ?>, BaseBuilder<?>> zaza) {
-            zaza.accept(slider, this);
-            // the position of the handle will be handled by the slider
-            // slide manhandling handle lmao
-            return this;
         }
 
         public Slider build() {

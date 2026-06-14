@@ -29,6 +29,11 @@ public class MonoColorRenderable extends PluginRenderable {
         GL11.glDisable(GL11.GL_BLEND);
     }
 
+    public MonoColorRenderable setColor(Color _c) {
+        this.c = _c;
+        return this;
+    }
+
     public MonoColorRenderable updateColors() {
         needsUpdate = true;
         return this;

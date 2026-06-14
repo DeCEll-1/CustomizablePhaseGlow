@@ -60,21 +60,34 @@ public class Rect {
     }
 
     public boolean containsMouse() {
-        // Fetch the current mouse coordinates
         int mouseX = Mouse.getX();
         int mouseY = Mouse.getY();
 
-        // Check if the mouse point falls within the rectangle's boundaries
         return mouseX >= this.x &&
                 mouseX <= (this.x + this.w) &&
                 mouseY >= this.y &&
                 mouseY <= (this.y + this.h);
     }
 
+    // from top left
+    public Point getRelativeMousePosition() {
+        int mouseX = Mouse.getX();
+        int mouseY = Mouse.getY();
+        return new Point((int) (mouseX - x), (int) (mouseY - y));
+    }
+
+    public PointF getRelativeMousePositionNormalised() {
+        int mouseX = Mouse.getX();
+        int mouseY = Mouse.getY();
+        return new PointF((mouseX - x) / w, (mouseY - y) / h);
+    }
+
     // texCoordinates
     public void render(Rect tc) {
         if (monocolor && hasColor)
             Misc.setColor(colorBL);
+        else
+            GL11.glColor4f(1f, 1f, 1f, 1f);
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
 
         // Bottom Left
@@ -103,7 +116,8 @@ public class Rect {
 
         GL11.glEnd();
 
-        GL11.glColor4f(1f, 1f, 1f, 1f); // reset color
+        if (monocolor || hasColor)
+            GL11.glColor4f(1f, 1f, 1f, 1f); // reset color
     }
 
     public void render() {
