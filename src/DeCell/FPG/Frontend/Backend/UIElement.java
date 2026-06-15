@@ -1,7 +1,5 @@
 package DeCell.FPG.Frontend.Backend;
 
-import DeCell.FPG.Frontend.Backend.Components.MyButton;
-import DeCell.FPG.Frontend.Backend.Components.MyTooltip;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
@@ -12,6 +10,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static DeCell.FPG.Frontend.Backend.DataPair.pair;
 
 public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponentAPI> {
     public final U u; // underlying
@@ -29,12 +29,31 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
 
 
     protected UIContainer<?, ?> parent;
+    protected boolean ignoreEvents = false;
+
+    public T setIgnoreEvents(boolean ignore) {
+        this.ignoreEvents = ignore;
+        return (T) this;
+    }
+
+    protected boolean consumeEvents = true;
+
+    public T setConsumeEvents(boolean consumeEvents) {
+        this.consumeEvents = consumeEvents;
+
+        return (T) this;
+    }
 
     public <P extends UIContainer<?, ?>> P getParent() {
         return (P) parent;
     }
 
     protected Dictionary<String, Object> internalData = new Hashtable<>();
+
+    public T addToInternalData(String s, Object data) {
+        addToInternalData(pair(s, data));
+        return (T) this;
+    }
 
     public T addToInternalData(DataPair... entries) {
         for (DataPair entry : entries) {
@@ -64,49 +83,60 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
     }
 
     public void processInput(List<InputEventAPI> events) {
-        if (u == null) return;
+        if (u == null || ignoreEvents) return;
 
-        // 1. Gather current state
         boolean isMouseOver = this.rect().containsMouse();
-        boolean isLeftMouseDown = Mouse.isButtonDown(0);
 
-        // 2. Handle Drag / Click Logic
-        if (isLeftMouseDown && isMouseOver && !wasClickedLastFrame) {
-            isDragging = true;
-            if (onMouseDown != null) {
-                onMouseDown.accept((T) this);
-            }
+        if (isMouseOver && !wasHovered) {
+            if (onMouseEnter != null) onMouseEnter.accept((T) this);
+        } else if (!isMouseOver && wasHovered) {
+            if (onMouseExit != null) onMouseExit.accept((T) this);
         }
 
-        if (!isLeftMouseDown && isDragging) {
-            isDragging = false;
-            if (onMouseUp != null) {
-                onMouseUp.accept((T) this);
-            }
-        }
-
-        // 3. Handle Hover Logic
         if (isMouseOver && onHover != null) {
             onHover.accept((T) this);
         }
 
-        if (isMouseOver && !wasHovered) {
-            if (onMouseEnter != null) {
-                onMouseEnter.accept((T) this);
+        if (!Mouse.isButtonDown(0))
+            isDragging = false; // only left mouse
+
+        for (InputEventAPI event : events) {
+            if (event.isConsumed()) continue;
+
+            Rect thisRect = this.rect();
+            boolean eventInside = this.getPosition().containsEvent(event);
+
+            if (event.isLMBDownEvent() && eventInside) {
+                isDragging = true;
+                if (consumeEvents)
+                    event.consume();
+
+                if (onMouseDown != null) {
+                    onMouseDown.accept((T) this);
+                }
             }
-        } else if (!isMouseOver && wasHovered) {
-            if (onMouseExit != null) {
-                onMouseExit.accept((T) this);
+
+            if (event.isLMBUpEvent() && isDragging) {
+                isDragging = false;
+                if (consumeEvents)
+                    event.consume();
+
+                if (onMouseUp != null) {
+                    onMouseUp.accept((T) this);
+                }
             }
         }
 
-        // 4. Update historical state for the next frame
-        wasClickedLastFrame = isLeftMouseDown;
         wasHovered = isMouseOver;
     }
 
     public boolean isDragging() {
         return isDragging;
+    }
+
+    public T setDragging(boolean dragging) {
+        this.isDragging = dragging;
+        return (T) this;
     }
 
     public void advance(float amount) {

@@ -1,14 +1,10 @@
-package DeCell.FPG;
-
-import DeCell.FPG.Hullmods.NoPhaseGlow;
-import com.fs.graphics.Sprite;
-import com.fs.starfarer.api.Global;
-import org.apache.log4j.Level;
+package DeCell.FPG.Reflection;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -189,30 +185,82 @@ public class Reflections {
         }
     }
 
-    public static Object invokeMethod(String methodName, Object target, Class<?>[] parameterTypes, Object... args) {
-        if (target == null || methodName == null || methodName.isEmpty()) {
-            throw new IllegalArgumentException("Target object and method name cannot be null or empty");
+    public static Object invokeMethod(String methodName, Object targetOrClass, Class<?>[] parameterTypes, Object... args) {
+        if (methodName == null || methodName.isEmpty()) {
+            throw new IllegalArgumentException("Method name cannot be null or empty");
+        }
+        if (targetOrClass == null) {
+            throw new IllegalArgumentException("Target object or target Class cannot be null");
         }
 
-        // Default to empty arrays if null is passed to prevent NullPointerExceptions
         Class<?>[] paramTypes = (parameterTypes != null) ? parameterTypes : new Class<?>[0];
         Object[] methodArgs = (args != null) ? args : new Object[0];
 
         try {
-            Class<?> clazz = target.getClass();
+            Class<?> clazz;
+            Object instance;
 
-            // 1. Get the Method object using the parameter types array
+            if (targetOrClass instanceof Class<?>) {
+                clazz = (Class<?>) targetOrClass;
+                instance = null;
+            } else {
+                clazz = targetOrClass.getClass();
+                instance = targetOrClass;
+            }
+
             Object method = getMethodHandle.invoke(clazz, methodName, paramTypes);
 
-            // 2. Make it accessible in case it's private/protected
             setMethodAccessable.invoke(method, true);
 
-            // 3. Invoke the method on the target, passing the arguments array
-            return invokeMethodHandle.invoke(method, target, methodArgs);
+            return invokeMethodHandle.invoke(method, instance, methodArgs);
 
         } catch (Throwable t) {
+            String className = (targetOrClass instanceof Class<?>)
+                    ? ((Class<?>) targetOrClass).getName()
+                    : targetOrClass.getClass().getName();
+
             throw new RuntimeException("Failed to invoke method '" + methodName +
-                    "' on " + target.getClass().getName() + " with the specified parameters.", t);
+                    "' on " + className + " with the specified parameters.", t);
+        }
+    }
+
+    public static Object createInstanceWithArgs(Class<?> clazz, Class<?>[] parameterTypes, Object... args) {
+        if (parameterTypes == null) parameterTypes = new Class<?>[0];
+        if (args == null) args = new Object[0];
+
+        try {
+            Object[] constructors = (Object[]) getDeclaredConstructorsHandle.invoke(clazz);
+
+            for (Object constructor : constructors) {
+                Class<?>[] paramTypes = (Class<?>[]) getConstructorParameterTypesHandle.invoke(constructor);
+
+                if (paramTypes.length != parameterTypes.length) {
+                    continue;
+                }
+
+                boolean match = true;
+                for (int i = 0; i < paramTypes.length; i++) {
+                    if (paramTypes[i] != parameterTypes[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    setConstructorAccessibleHandle.invoke(constructor, true);
+
+                    Object[] newArray = Arrays.copyOf(args, args.length + 1);
+                    newArray[0] = constructor;
+                    System.arraycopy(args, 0, newArray, 1, args.length);
+                    return constructorNewInstanceHandle.invokeWithArguments(newArray);
+                }
+            }
+
+            throw new NoSuchMethodException("No constructor found for " + clazz.getName() +
+                    " with specified parameter types.");
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed to instantiate " + clazz.getName() + " with arguments via MethodHandles", t);
         }
     }
 }

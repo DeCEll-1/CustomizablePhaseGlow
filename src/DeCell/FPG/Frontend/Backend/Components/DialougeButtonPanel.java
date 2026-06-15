@@ -11,11 +11,11 @@ import DeCell.FPG.Frontend.Backend.Renderable.BorderRenderable;
 import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.JavaSlop.TriConsumer;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import org.lwjgl.input.Keyboard;
 
-import java.util.Dictionary;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -58,10 +58,15 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
                                         new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"), 32)
                                                 .setPadding(-8).setRenderInside(true))
                         ).add(new LambdaUIPanelPlugin()
-                                .onProcessInput(e -> {
-                                            if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
-                                                this.click();
-                                            e.forEach($_ -> {
+                                .onProcessInput(events -> {
+                                            for (InputEventAPI e : events) {
+                                                if (e.isKeyDownEvent() && e.getEventValue() == Keyboard.KEY_ESCAPE) {
+                                                    this.click();
+                                                    e.consume();
+                                                }
+                                            }
+
+                                            events.forEach($_ -> {
                                                 $_.consume();
                                             });
                                         }
@@ -79,7 +84,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
     }
 
     protected TriConsumer<MyPanel, DialougeButtonPanel, List<UIElement<?, ?>>> onUIOpen;
-    protected Consumer<Dictionary<String, Object>> onUIClose;
+    protected Consumer<DialougeButtonPanel> onUIClose;
 
     private void click(MyButton b) {
         click();
@@ -90,7 +95,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         if (isOpen) {
             this.u.removeComponent(container.u);
             if (onUIClose != null)
-                onUIClose.accept(internalData);
+                onUIClose.accept(this);
         } else {
             createContainer();
             if (onUIOpen != null)
@@ -106,7 +111,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         return this;
     }
 
-    public DialougeButtonPanel setOnUIClose(Consumer<Dictionary<String, Object>> onClick) {
+    public DialougeButtonPanel setOnUIClose(Consumer<DialougeButtonPanel> onClick) {
         this.onUIClose = onClick;
         return this;
     }
@@ -135,9 +140,10 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
             return this;
         }
 
-        public DialougeButtonPanel popup(List<UIElement<?, ?>> UIElements) {
+        public DialougeButtonPanel build(List<UIElement<?, ?>> UIElements) {
             UIPanelAPI currentTab = (UIPanelAPI) getCurrentTab();
-            MyPanel popupContainer = new MyPanel.Builder(currentTab.getPosition().getWidth(), currentTab.getPosition().getHeight()).build(currentTab).addTo(UIElements);
+            MyPanel popupContainer = new MyPanel.Builder(currentTab.getPosition().getWidth(), currentTab.getPosition().getHeight()).build(currentTab)
+                    .addTo(UIElements);
             if (charlie) {
                 CharlieElement charlie = new CharlieElement(popupContainer);
                 return new DialougeButtonPanel(w, h, button, charlie).inMid();

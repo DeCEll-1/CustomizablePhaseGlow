@@ -23,12 +23,17 @@ public abstract class UIContainer<T extends UIElement<T, U>, U extends UICompone
         this.UIElements.add(element);
     }
 
+    public void addElementToFirst(UIElement<?, ?> element) {
+        this.UIElements.add(0, element);
+    }
+
     public void removeElement(UIElement<?, ?> element) {
         this.UIElements.remove(element);
     }
 
     @Override
     public void advance(float amount) {
+        super.advance(amount);
         List<UIElement<?, ?>> tempList = new ArrayList<>(activeUIElements);
 
         for (UIElement<?, ?> element : tempList)
@@ -39,17 +44,17 @@ public abstract class UIContainer<T extends UIElement<T, U>, U extends UICompone
             element.advance(amount);
 
         if (!UIElements.isEmpty()) {
-            activeUIElements.addAll(UIElements);
+            activeUIElements.addAll(0, UIElements);
             UIElements.clear();
         }
     }
 
     @Override
     public void processInput(List<InputEventAPI> events) {
-        super.processInput(events);
         for (UIElement<?, ?> element : activeUIElements) {
             element.processInput(events);
         }
+        super.processInput(events);
     }
 
     @Override

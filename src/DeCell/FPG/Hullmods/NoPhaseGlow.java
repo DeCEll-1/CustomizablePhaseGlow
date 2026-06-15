@@ -1,14 +1,13 @@
 package DeCell.FPG.Hullmods;
 
 import DeCell.FPG.FancyPhaseGlow;
-import DeCell.FPG.Reflections;
+import DeCell.FPG.Reflection.Reflections;
 import DeCell.FPG.Shader;
 import com.fs.graphics.Sprite;
 import com.fs.graphics.util.B;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.ShipAPI;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.combat.entities.Ship;
 import org.apache.log4j.Level;

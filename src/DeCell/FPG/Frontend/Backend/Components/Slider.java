@@ -7,9 +7,11 @@ import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Frontend.Backend.UIElement;
 import DeCell.FPG.Misc;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import org.lwjgl.input.Mouse;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -32,6 +34,7 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
 
     public Slider(MyPanel sldr, MyButton hndl, RenderableHandlerPlugin renderPlugin) {
         super(sldr.u);
+        setIgnoreEvents(true);
         this.slider = sldr;
         slider.addElement(this);
         Scroll scrollGear = new Scroll();
@@ -58,10 +61,9 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         return renderableHandlerPlugin;
     }
 
-    //#region handle stuff
     @Override
-    public void advance(float amount) {
-        super.advance(amount);
+    public void processInput(List<InputEventAPI> events) {
+        super.processInput(events);
         // java is so good!!!!! it allows protected fields and whatnot to be accessable in the same package!!!
         // very good languag design
         // ;kms
@@ -116,7 +118,8 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         float mouseX = Mouse.getX() + halfHandleWidth;
 
         handleRelativeX = Mouse.getX() - slider.x();
-        updateHandle(false); // the button itself will trigger on click
+        handle.setDragging(true);
+        updateHandle(true);
     }
 
     //#endregion

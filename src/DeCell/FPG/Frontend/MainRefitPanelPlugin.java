@@ -8,6 +8,7 @@ import DeCell.FPG.Frontend.Backend.Components.ColorPicker.ColorPickerV2;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
+import DeCell.FPG.Reflection.InputEventAPICreator;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.combat.entities.Ship;
@@ -31,7 +32,8 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
     @Override
     public void init(CustomPanelAPI _p) {
-        MyPanel parent = new MyPanel(_p).addTo(UIElements);
+        MyPanel parent = new MyPanel(_p).addTo(UIElements).setIgnoreEvents(true);
+        Rect zaza = parent.rect();
 
         MyPanel refitWindowOpenerButtonPanel = new MyPanel.Builder(190, 25).build(parent).inBL(601, 40);
 
@@ -41,7 +43,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                 .build();
 
 
-        new DialougeButtonPanel.Builder(720, 640, panelOpeningButton).withCharlie().popup(UIElements)
+        new DialougeButtonPanel.Builder(720, 640, panelOpeningButton).withCharlie().build(UIElements)
                 .addToInternalData(pair("ship", ship))
                 .setOnUIOpen((panel, dialogue, _UIElements) ->
                 {
@@ -76,7 +78,25 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             .setAmountOfDecimalPlaces(0)
                             .setMinMax(0, 255);
 
-                    new ColorPickerV2.Builder().build(panel).setAdapter(new RgbColorPickerAdapter()).inMid();
+                    new DialougeButtonPanel
+                            .Builder(ColorPickerV2.sizeRect.w, ColorPickerV2.sizeRect.h,
+                            new MyButton.Builder("Open Color Picker", 190, 25, panel).build()
+                    ).build(_UIElements)
+                            .addToInternalData("dbg_button", debugButton)
+                            .setOnUIOpen(
+                                    (_panel, _dialogue, __UIElements) ->
+                                    {
+                                        new ColorPickerV2.Builder().build(_panel).setAdapter(new RgbColorPickerAdapter())
+                                                .inMid().addToInternalData("dialogue", _dialogue)
+                                                .setOnChange(s -> {
+                                                    s.<DialougeButtonPanel>getFromInternal("dialogue")
+                                                            .addToInternalData("out", s.getColor().toString());
+                                                })
+                                        ;
+                                    }
+                            ).setOnUIClose(_dialogue ->
+                                    _dialogue.<MyButton>getFromInternal("dbg_button")
+                                            .setText(_dialogue.getFromInternal("out")));
 
 
                 });
@@ -97,8 +117,10 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
     @Override
     public void processInput(List<InputEventAPI> events) {
+        // need to recreate as the game destroys mouse inputs for stuff like buttons after consuming them
+        List<InputEventAPI> zaza = InputEventAPICreator.createImmediateEvents();
         for (UIElement<?, ?> element : ActiveUIElements) {
-            element.processInput(events);
+            element.processInput(zaza);
         }
     }
 }

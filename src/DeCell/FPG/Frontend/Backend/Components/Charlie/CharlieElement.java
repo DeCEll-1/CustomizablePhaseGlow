@@ -36,7 +36,6 @@ public class CharlieElement extends UIContainer<CharlieElement, CustomPanelAPI> 
 
     public <T extends UIContainer<?, ?> & Openable> CharlieElement addOpenable(T o) {
         this.u.addComponent(o.u);
-        this.addElement(o);
         o.setOnOpenClose(this::onOpenStateChanged);
         return this;
     }

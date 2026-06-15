@@ -4,7 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
-import static DeCell.FPG.Reflections.invokeMethod;
+import static DeCell.FPG.Reflection.Reflections.invokeMethod;
 
 public class UI {
     public static com.fs.starfarer.coreui.refit.U getRefitPanel() {

@@ -27,7 +27,7 @@ public class MyButton extends UIContainer<MyButton, UIComponentAPI> {
 
     private MyButton(String text, float width, float height, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
+        _parent.addElementToFirst(this);
         this.parent = _parent;
         btn = _parent.addButton(text, null, width, height, pad);
     }
@@ -35,7 +35,7 @@ public class MyButton extends UIContainer<MyButton, UIComponentAPI> {
     private MyButton(String text, Color base, Color bg,
                      float width, float height, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
+        _parent.addElementToFirst(this);
         this.parent = _parent;
         btn = _parent.addButton(text, null, base, bg, width, height, pad);
     }
@@ -44,7 +44,7 @@ public class MyButton extends UIContainer<MyButton, UIComponentAPI> {
                      Alignment align, CutStyle style,
                      float width, float height, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
+        _parent.addElementToFirst(this);
         this.parent = _parent;
         btn = _parent.addButton(text, null, base, bg, align, style, width, height, pad);
     }

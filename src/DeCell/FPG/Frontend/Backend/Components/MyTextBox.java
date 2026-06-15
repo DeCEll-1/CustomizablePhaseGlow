@@ -2,7 +2,6 @@ package DeCell.FPG.Frontend.Backend.Components;
 
 import DeCell.FPG.Frontend.Backend.BaseBuilder;
 import DeCell.FPG.Frontend.Backend.UIContainer;
-import DeCell.FPG.Frontend.Backend.UIElement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
@@ -14,7 +13,7 @@ import java.util.Objects;
 import java.util.function.*;
 import java.util.regex.Pattern;
 
-import static DeCell.FPG.Reflections.invokeMethod;
+import static DeCell.FPG.Reflection.Reflections.invokeMethod;
 
 public class MyTextBox extends UIContainer<MyTextBox, UIComponentAPI> {
     //#region constants
