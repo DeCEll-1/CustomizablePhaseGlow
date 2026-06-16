@@ -15,6 +15,7 @@ import static DeCell.FPG.Frontend.Backend.DataPair.pair;
 
 public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponentAPI> {
     public final U u; // underlying
+    public String name = java.util.UUID.randomUUID().toString(); // solely for debugging
 
     protected Consumer<T> onMouseEnter;
     protected Consumer<T> onMouseExit;
@@ -357,4 +358,10 @@ public abstract class UIElement<T extends UIElement<T, U>, U extends UIComponent
     }
 
     //#endregion
+
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }

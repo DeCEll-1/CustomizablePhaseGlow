@@ -21,7 +21,7 @@ public class MyTextBox extends UIContainer<MyTextBox, UIComponentAPI> {
     public static final String defaultFont = "graphics/fonts/insignia21LTaa.fnt";
     private boolean ignoreNextTextChangeTrigger = false;
     //#endregion
-    private final TextFieldAPI textField;
+    private TextFieldAPI textField;
 
     public TextFieldAPI getTExtField() {
         return textField;
@@ -29,22 +29,22 @@ public class MyTextBox extends UIContainer<MyTextBox, UIComponentAPI> {
 
     public MyTextBox(float w, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
         this.parent = _parent;
+        parent.addElement(this);
         textField = _parent.addTextField(w, pad);
     }
 
     public MyTextBox(float w, String font, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
         this.parent = _parent;
+        parent.addElement(this);
         textField = _parent.addTextField(w, font, pad);
     }
 
     public MyTextBox(float w, float h, String font, float pad, MyTooltip _parent) {
         super(_parent.u);
-        _parent.addElement(this);
         this.parent = _parent;
+        parent.addElement(this);
         textField = _parent.addTextField(w, h, font, pad);
     }
 
@@ -290,6 +290,9 @@ public class MyTextBox extends UIContainer<MyTextBox, UIComponentAPI> {
         public MyTextBox build() {
             MyTextBox tb = new MyTextBox(w, h, font, pad, parent);
             tb.textField.getPosition().inTL(0, 0);
+            tb.name = "TextBox_" + tb.name;
+            // since the parent is a tooltip they dont get names by default
+            tb.parent.name = "TextBox_parent_" + tb.parent.name;
             return tb;
         }
 

@@ -27,6 +27,7 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class FancyPhaseGlow {
     public static boolean Debug = false;
+    public static boolean DebugUI = false;
 
     public static void Log(String s) {
         Global.getLogger(FancyPhaseGlow.class).log(Priority.INFO, s);

@@ -10,24 +10,52 @@ public class BorderRenderable extends PluginRenderable {
 
     private SpriteAPI borderSprite;     // The border texture (9-patch style recommended)
 
-    // Individual side thicknesses (for more control)
-    private float left, right, top, bottom;
+    // the texture thickness widths
+    private float leftSlice, rightSlice, topSlice, bottomSlice;
+
+    // the actual border width
+    private float leftThickness, rightThickness, topThickness, bottomThickness;
+
     private float padding = 0;
     private boolean renderInside = false;
 
-    public BorderRenderable(SpriteAPI borderSprite, float thickness) {
+    public BorderRenderable(SpriteAPI borderSprite) {
         this.borderSprite = borderSprite;
-        this.left = this.right = this.top = this.bottom = thickness;
     }
 
     public BorderRenderable(SpriteAPI borderSprite, float left, float right, float top, float bottom) {
         this.borderSprite = borderSprite;
-        this.left = left;
-        this.right = right;
-        this.top = top;
-        this.bottom = bottom;
+        this.leftSlice = left;
+        this.rightSlice = right;
+        this.topSlice = top;
+        this.bottomSlice = bottom;
     }
 
+    public BorderRenderable setSlices(float slice) {
+        this.leftSlice = this.rightSlice = this.topSlice = this.bottomSlice = slice;
+        return this;
+    }
+
+    public BorderRenderable setSlices(float left, float top, float right, float bottom) {
+        this.leftSlice = left;
+        this.topSlice = top;
+        this.rightSlice = right;
+        this.bottomSlice = bottom;
+        return this;
+    }
+
+    public BorderRenderable setThickness(float thickness) {
+        leftThickness = rightThickness = topThickness = bottomThickness = thickness;
+        return this;
+    }
+
+    public BorderRenderable setThickness(float left, float top, float right, float bottom) {
+        this.leftThickness = left;
+        this.topThickness = top;
+        this.rightThickness = right;
+        this.bottomThickness = bottom;
+        return this;
+    }
 
     @Override
     public void init(CustomPanelAPI parent) {
@@ -62,47 +90,46 @@ public class BorderRenderable extends PluginRenderable {
         float texW = borderSprite.getWidth() / texT; // raw pixel width
         float texH = borderSprite.getHeight() / texT; // raw pixel height
 
-        float borderTopTextureBorder = texT - (top / texH);
-        float borderRightTextureBorder = texS - (right / texW);
-        float borderBottomTextureBorder = bottom / texH;
-        float borderLeftTextureBorder = left / texW;
+        float borderTopTextureBorder = texT - (topSlice / texH);
+        float borderRightTextureBorder = texS - (rightSlice / texW);
+        float borderBottomTextureBorder = bottomSlice / texH;
+        float borderLeftTextureBorder = leftSlice / texW;
 
-        // zone.render(borderSprite);
 
         // Top Left
-        new Rect(x + padding, y + h - top - padding, left, top) // TODO: cache these
+        new Rect(x + padding, y + h - topThickness - padding, leftThickness, topThickness) // TODO: cache these
                 .render(new Rect(0, borderTopTextureBorder, borderLeftTextureBorder, texT));
 
         // Top Right
-        new Rect(x + w - right - padding, y + h - top - padding, right, top)
+        new Rect(x + w - rightThickness - padding, y + h - topThickness - padding, rightThickness, topThickness)
                 .render(new Rect(borderRightTextureBorder, borderTopTextureBorder, texS, texT));
 
         // Bottom Left
-        new Rect(x + padding, y + padding, left, bottom)
+        new Rect(x + padding, y + padding, leftThickness, bottomThickness)
                 .render(new Rect(0, 0, borderLeftTextureBorder, borderBottomTextureBorder));
 
         // Bottom Right
-        new Rect(x + w - right - padding, y + padding, right, bottom)
+        new Rect(x + w - rightThickness - padding, y + padding, rightThickness, bottomThickness)
                 .render(new Rect(borderRightTextureBorder, 0, texS, borderBottomTextureBorder));
 
         // Top Edge
-        new Rect(x + left + padding, y + h - top - padding, w - left - right - (2 * padding), top)
+        new Rect(x + leftThickness + padding, y + h - topThickness - padding, w - leftThickness - rightThickness - (2 * padding), topThickness)
                 .render(new Rect(borderLeftTextureBorder, borderTopTextureBorder, borderRightTextureBorder, texT));
 
         // Bottom Edge
-        new Rect(x + left + padding, y + padding, w - left - right - (2 * padding), bottom)
+        new Rect(x + leftThickness + padding, y + padding, w - leftThickness - rightThickness - (2 * padding), bottomThickness)
                 .render(new Rect(borderLeftTextureBorder, 0, borderRightTextureBorder, borderBottomTextureBorder));
 
         // Left Edge
-        new Rect(x + padding, y + bottom + padding, left, h - top - bottom - (2 * padding))
+        new Rect(x + padding, y + bottomThickness + padding, leftThickness, h - topThickness - bottomThickness - (2 * padding))
                 .render(new Rect(0, borderBottomTextureBorder, borderLeftTextureBorder, borderTopTextureBorder));
 
         // Right Edge
-        new Rect(x + w - right - padding, y + bottom + padding, right, h - top - bottom - (2 * padding))
+        new Rect(x + w - rightThickness - padding, y + bottomThickness + padding, rightThickness, h - topThickness - bottomThickness - (2 * padding))
                 .render(new Rect(borderRightTextureBorder, borderBottomTextureBorder, texS, borderTopTextureBorder));
 
-        if (renderInside)
-            new Rect(x + left + padding, y + bottom + padding, w - left - right - (2 * padding), h - top - bottom - (2 * padding))
+        if (renderInside) // TODO: make this a seperate texture as it scales like a bitch with this setup
+            new Rect(x + leftThickness + padding, y + bottomThickness + padding, w - leftThickness - rightThickness - (2 * padding), h - topThickness - bottomThickness - (2 * padding))
                     .render(new Rect(borderLeftTextureBorder, borderBottomTextureBorder, borderRightTextureBorder, borderTopTextureBorder));
 
 //        GL11.glColor4f(1f, 1f, 1f, 1f);

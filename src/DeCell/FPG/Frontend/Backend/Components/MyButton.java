@@ -268,6 +268,9 @@ public class MyButton extends UIContainer<MyButton, UIComponentAPI> {
 
             if (btn == null)
                 btn = new MyButton(text, w, h, pad, parent);
+            btn.getButton().getPosition().inTR(0, 0);
+            btn.name = "Button_" + btn.name; // we are doing this here cuz doing it above would suck lowkey
+            btn.parent.name = "Button_parent_" + btn.name;
             return btn;
         }
 

@@ -35,7 +35,11 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
     public Slider(MyPanel sldr, MyButton hndl, RenderableHandlerPlugin renderPlugin) {
         super(sldr.u);
         setIgnoreEvents(true);
+        this.name = "Slider_" + this.name;
         this.slider = sldr;
+        this.slider.name = "Slider_slider_" + this.slider.name;
+        handle = hndl;
+        this.handle.name = "Slider_handle_" + this.handle.name;
         slider.addElement(this);
         Scroll scrollGear = new Scroll();
         slider.setOnHover(scrollGear::onHover);
@@ -45,7 +49,6 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         });
         slider.setOnMouseDown(this::onSliderClick);
 
-        handle = hndl;
         handle.inTL(0 - halfHandleWidth, handleTLPadding);
 
         renderableHandlerPlugin = renderPlugin;

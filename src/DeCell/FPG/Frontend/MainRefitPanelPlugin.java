@@ -7,6 +7,7 @@ import DeCell.FPG.Frontend.Backend.Components.ColorPicker.Adapters.RgbColorPicke
 import DeCell.FPG.Frontend.Backend.Components.ColorPicker.ColorPickerV2;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
+import DeCell.FPG.Frontend.Backend.Components.Dialogues.ColorPickerV2Dialogue;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
 import DeCell.FPG.Reflection.InputEventAPICreator;
 import com.fs.starfarer.api.input.InputEventAPI;
@@ -35,13 +36,12 @@ public class MainRefitPanelPlugin extends PanelPlugin {
         MyPanel parent = new MyPanel(_p).addTo(UIElements).setIgnoreEvents(true);
         Rect zaza = parent.rect();
 
-        MyPanel refitWindowOpenerButtonPanel = new MyPanel.Builder(190, 25).build(parent).inBL(601, 40);
+        MyPanel refitWindowOpenerButtonPanel = new MyPanel.Builder(190, 25).build(parent).inBL(606, 40);
 
         MyButton panelOpeningButton = new MyButton.Builder("Modify Phase Effects", 190, 25, refitWindowOpenerButtonPanel)
                 .setColors(new Color(0xDDDDDD), new Color(0x444444))
                 .setStyle(Alignment.MID, CutStyle.TL_BR)
                 .build();
-
 
         new DialougeButtonPanel.Builder(720, 640, panelOpeningButton).withCharlie().build(UIElements)
                 .addToInternalData(pair("ship", ship))
@@ -78,26 +78,14 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                             .setAmountOfDecimalPlaces(0)
                             .setMinMax(0, 255);
 
-                    new DialougeButtonPanel
-                            .Builder(ColorPickerV2.sizeRect.w, ColorPickerV2.sizeRect.h,
-                            new MyButton.Builder("Open Color Picker", 190, 25, panel).build()
-                    ).build(_UIElements)
-                            .addToInternalData("dbg_button", debugButton)
-                            .setOnUIOpen(
-                                    (_panel, _dialogue, __UIElements) ->
-                                    {
-                                        new ColorPickerV2.Builder().build(_panel).setAdapter(new RgbColorPickerAdapter())
-                                                .inMid().addToInternalData("dialogue", _dialogue)
-                                                .setOnChange(s -> {
-                                                    s.<DialougeButtonPanel>getFromInternal("dialogue")
-                                                            .addToInternalData("out", s.getColor().toString());
-                                                })
-                                        ;
-                                    }
-                            ).setOnUIClose(_dialogue ->
-                                    _dialogue.<MyButton>getFromInternal("dbg_button")
-                                            .setText(_dialogue.getFromInternal("out")));
+                    new ColorPickerV2Dialogue().popup(
+                            new MyButton.Builder("Open Color Picker", 190, 25, panel).build(),
+                            _UIElements,
+                            (s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getColor().toString())),
+                            pair("debug_btn", debugButton)
+                    );
 
+                    new MyLabel.Builder("zazazazazazazazazazazazazazazaza", 0, 0, panel).build().inMid();
 
                 });
     }

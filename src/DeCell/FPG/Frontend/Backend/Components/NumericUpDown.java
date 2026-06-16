@@ -29,10 +29,14 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     public NumericUpDown(MyPanel _container, MyTextBox _tb, MyButton _up, MyButton _down) {
         super(_container.u);
         _container.addElement(this);
+        this.name = "NumericUpDown_" + this.name;
         this.parent = _container;
         this.tb = _tb;
+        this.tb.name = "NumericUpDown_tb_" + this.tb.name;
         this.up = _up;
+        this.up.name = "NumericUpDown_up_" + this.up.name;
         this.down = _down;
+        this.down.name = "NumericUpDown_down_" + this.down.name;
 
         tb.setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
         tb.setTextValidator((t) -> {

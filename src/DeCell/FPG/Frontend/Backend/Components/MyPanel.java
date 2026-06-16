@@ -17,6 +17,7 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
     public MyPanel(float w, float h, PanelPlugin p, MyPanel _parent, boolean init) {
         super(_parent.u.createCustomPanel(w, h, p));
         this.plugin = p;
+        this.name = "Panel_" + this.name;
         if (init) initPlugin();
         _parent.addComponent(this);
         this.parent = _parent;
@@ -25,6 +26,7 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
     public MyPanel(float w, float h, PanelPlugin p, CustomPanelAPI _parent, boolean init) {
         super(_parent.createCustomPanel(w, h, p));
         this.plugin = p;
+        this.name = "Panel_" + this.name;
         if (init) initPlugin();
         _parent.addComponent(u);
     }
@@ -32,6 +34,7 @@ public class MyPanel extends UIContainer<MyPanel, CustomPanelAPI> {
     public MyPanel(float w, float h, PanelPlugin p, UIPanelAPI _parent, boolean init) {
         super(Global.getSettings().createCustom(w, h, p));
         this.plugin = p;
+        this.name = "Panel_" + this.name;
         if (init) initPlugin();
         _parent.addComponent(u);
     }

@@ -33,6 +33,7 @@ public class UpDownArrow {
         }
     }
 
+    // TODO: make these use the new event system
     public void advance() {
         boolean upPressed = Keyboard.isKeyDown(Keyboard.KEY_UP);
         boolean downPressed = Keyboard.isKeyDown(Keyboard.KEY_DOWN);

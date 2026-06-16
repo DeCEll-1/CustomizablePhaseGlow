@@ -30,10 +30,17 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
     public DialougeButtonPanel(float w, float h, MyButton _button, CharlieElement _parent) {
         super(_parent.u.createCustomPanel(w, h, null));
         _parent.addOpenable(this);
-        _parent.addElement(this);
         this.parent = _parent;
-
         this.button = _button;
+
+        this.name = "DialougeButtonPanel_" + this.name;
+        this.button.name = "DialougeButtonPanel_button_" + this.button.name;
+        this.parent.addElement(this);
+        // we can set this things parents name as its parent will never be a pre existing panel
+        // and nothing will touch it
+        this.parent.name = "DialougeButtonPanel_parent_" + _parent.name;
+        setIgnoreEvents(true);
+
         this.button.setOnMouseDown(this::click);
     }
 
@@ -42,8 +49,13 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         _parent.addComponent(this.u);
         _parent.addElement(this);
         this.parent = _parent;
-
         this.button = _button;
+
+        // Update names to match the convention of the first constructor
+        this.name = "DialougeButtonPanel_" + this.name;
+        this.button.name = "DialougeButtonPanel_button_" + _button.name;
+        this.parent.name = "DialougeButtonPanel_parent_" + _parent.name;
+
         this.button.setOnMouseDown(this::click);
     }
 
@@ -55,8 +67,10 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
                         .add(new RenderableHandlerPlugin()
                                 .addBelow(
                                         // TODO: make these more modifyable
-                                        new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"), 32)
-                                                .setPadding(-8).setRenderInside(true))
+                                        new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"))
+                                                .setSlices(32)
+                                                .setThickness(16)
+                                                .setPadding(-16).setRenderInside(true))
                         ).add(new LambdaUIPanelPlugin()
                                 .onProcessInput(events -> {
                                             for (InputEventAPI e : events) {
@@ -73,10 +87,11 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
                                 )
                         )
                 )
-                .build(this.u).inBL(0, 0).addTo(UIElements);
+                .build(this.u).setConsumeEvents(false).inBL(0, 0).addTo(UIElements);
 
 
-        new MyButton.Builder("X", 24, 24, container).build().inTR(26, 16);
+        // the X button stays as it doesnt *really* batter if its unvisible
+        new MyButton.Builder("X", 24, 24, container).build().inTR(0, 0);
     }
 
     public DialougeButtonPanel(CustomPanelAPI underlying) {
@@ -133,6 +148,12 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
             this.w = width;
             this.h = height;
             this.button = button;
+        }
+
+        public Builder(float width, float height, MyButton.Builder button) {
+            this.w = width; // TODO: probably implement more *.Builder ones
+            this.h = height;
+            this.button = button.build();
         }
 
         public Builder withCharlie() {

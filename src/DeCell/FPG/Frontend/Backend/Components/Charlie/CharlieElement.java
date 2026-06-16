@@ -17,9 +17,11 @@ public class CharlieElement extends UIContainer<CharlieElement, CustomPanelAPI> 
 
     public CharlieElement(MyPanel _parent) {
         super(_parent.u.createCustomPanel(_parent.w(), _parent.h(), new MultiPluginHandler()));
+        this.name = "Charlie_" + this.name;
         _parent.addComponent(this.u).inBL(0, 0);
-        _parent.addElement(this);
         this.parent = _parent;
+        this.parent.name = "Charlie_parent_" + this.parent.name;
+        parent.addElement(this);
 
         this.plugin = ((MultiPluginHandler) this.u.getPlugin());
         this.plugin.add(new RenderableHandlerPlugin().addBelow(background));

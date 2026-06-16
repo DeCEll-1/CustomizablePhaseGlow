@@ -12,6 +12,7 @@ public class ModPlugin extends BaseModPlugin {
         Global.getLogger(FancyPhaseGlow.class).log(Level.INFO, "FPG_Loaded");
 
         FancyPhaseGlow.Debug = Global.getSettings().getBoolean("fpg_debug");
+        FancyPhaseGlow.DebugUI = Global.getSettings().getBoolean("fpg_debug_ui");
 
 
     }
