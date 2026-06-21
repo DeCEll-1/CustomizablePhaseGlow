@@ -19,6 +19,7 @@ public class ModPlugin extends BaseModPlugin {
 
     public void onGameLoad(boolean newGame) {
         Global.getSector().addTransientScript(new CustomBanel());
+        FancyPhaseGlow.UpdateShaders();
     }
 
 

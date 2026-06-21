@@ -2,12 +2,10 @@ package DeCell.FPG.Frontend.Backend.Components.Combobox;
 
 public class ComboboxElement {
     public String text = "";
-    public ComboboxData data;
+    public Object data;
 
-    public ComboboxElement(String _0) {
-        this.text = _0;
-    }
-    public ComboboxElement(ComboboxData _0) {
-        this.data = _0;
+    public ComboboxElement(String text, Object data) {
+        this.text = text;
+        this.data = data;
     }
 }

@@ -124,56 +124,39 @@ public class Shader {
         return handle;
     }
 
-//    private void setHandle(int handle) {
-//        this.handle = handle;
-//    }
-
     public boolean isInitialized() {
         return initialized;
     }
-
-//    private void setInitialized(boolean initialized) {
-//        this.initialized = initialized;
-//    }
 
     public boolean isDisposed() {
         return disposed;
     }
 
-//    private void setDisposed(boolean disposed) {
-//        this.disposed = disposed;
-//    }
-
     public String getVertexSource() {
         return vertexSource;
     }
-
-//    private void setVertexSource(String vertexSource) {
-//        this.vertexSource = vertexSource;
-//    }
 
     public String getFragmentSource() {
         return fragmentSource;
     }
 
-//    private void setFragmentSource(String fragmentSource) {
-//        this.fragmentSource = fragmentSource;
-//    }
-
     public String getName() {
         return name;
     }
-
-//    private void setName(String name) {
-//        this.name = name;
-//    }
 
     public ShaderUniformManager getUniformManager() {
         return uniformManager;
     }
 
-//    private void setUniformManager(ShaderUniformManager uniformManager) {
-//        this.uniformManager = uniformManager;
-//    }
-
+    @Override
+    public String toString() {
+        return "Shader{" +
+                "handle=" + handle +
+                ", initialized=" + initialized +
+                ", disposed=" + disposed +
+                ", vertexSource='" + vertexSource + '\'' +
+                ", fragmentSource='" + fragmentSource + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

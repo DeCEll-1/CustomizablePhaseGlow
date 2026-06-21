@@ -9,7 +9,9 @@ import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Components.Dialogues.ColorPickerV2Dialogue;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
+import DeCell.FPG.JavaSlop.ShaderJsonParsing.ShaderJsonModel;
 import DeCell.FPG.Reflection.InputEventAPICreator;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.combat.entities.Ship;
@@ -49,43 +51,31 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                 {
                     Ship currShip = dialogue.getFromInternal("ship");
 
-                    MyButton debugButton = new MyButton.Builder("Debug", 190, 24, panel)
-                            .setStyle(Alignment.MID, CutStyle.TOP)
-                            .build().inBR(16, 4);
+                    MyCombobox cb = MyCombobox.Builder.build(
+                            190, 25,
+                            "Select Element",
+                            panel
+                    ).inTL(26, 30);
 
-                    MyCombobox.Builder.build(
-                                    190, 25,
-                                    "Select Element",
-                                    panel
-                            ).inTL(26, 30)
-                            .addItem(new ComboboxElement("balls"))
-                            .addItem(new ComboboxElement("balls2"))
-                            .addItem(new ComboboxElement("balls3"))
-                            .addItem(new ComboboxElement("balls4"))
-                            .setOnUpdate((cb, el) -> {
-                            })
-                    ;
+                    for (ShaderJsonModel phaseShader : FancyPhaseGlow.PhaseShaders) {
+                        cb.addItem(new ComboboxElement(phaseShader.title, phaseShader));
+                    }
 
-                    MyTextBox testTB = new MyTextBox.Builder(160, panel)
-                            .build()
-                            .inTR(50, 50)
-                            .addToInternalData(pair("debug_btn", debugButton))
-                            .setOnTextChange(s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getText()))
-                            .setMaxChars(50).setValidationRegex(FancyPhaseGlow.Patterns.DECIMAL_ONLY);
+                    ShaderJsonModel curr = FancyPhaseGlow.getShaderForShip(currShip);
+                    if (curr != null)
+                        cb.setIndex(FancyPhaseGlow.PhaseShaders.indexOf(curr));
 
-                    new NumericUpDown.Builder().build(200, panel)
-                            .belowRight(testTB.getParent().u, 2)
-                            .setAmountOfDecimalPlaces(0)
-                            .setMinMax(0, 255);
+                    cb.setOnUpdate((c, el) -> {
+                        FancyPhaseGlow.setShaderForShip(currShip, (ShaderJsonModel) el.data);
+                    });
 
-                    new ColorPickerV2Dialogue().popup(
-                            new MyButton.Builder("Open Color Picker", 190, 25, panel).build(),
-                            _UIElements,
-                            (s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getColor().toString())),
-                            pair("debug_btn", debugButton)
-                    );
 
-                    new MyLabel.Builder("zazazazazazazazazazazazazazazaza", 0, 0, panel).build().inMid();
+//                    new ColorPickerV2Dialogue().popup(
+//                            new MyButton.Builder("Open Color Picker", 190, 25, panel).build(),
+//                            _UIElements,
+//                            (s -> s.<MyButton>getFromInternal("debug_btn").setText(s.getColor().toString())),
+//                            pair("debug_btn", debugButton)
+//                    );
 
                 });
     }

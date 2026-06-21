@@ -1,15 +1,16 @@
 {
     "$schema": "./Schemav1.json",
-    "Shaders": [
+    "Shaders": [ # gotta use #s for comments here because as much as hjson allows // for comments the game doesnt
         {
             "ID": "fpg_radial",
             "Title": "Radial",
-            "FragmentShaderPath": "./radial.frag", // dot (.) at the start of the file path is a hard coded special case
-            // it will replace the dot with data/shaders/fpg
+            "FragmentShaderPath": "./radial.frag", # dot (.) at the start of the file path is a hard coded special case
+            # it will replace the dot with data/shaders/fpg
+            # vertex shader is not necessary as its not rly usefull in this case
             "Uniforms": [
                 {
                     "Name": "textureSampler",
-                    "Type": "sampler2D",
+                    "Type": "sampler2D", # TODO: do not make type a requirement for engine values
                     "Value": "phase_texture"
                 },
                 {
@@ -32,7 +33,7 @@
                 {
                     "Name": "colors",
                     "Type": "col3[]",
-                    "Value": [
+                    "Value": [ # hex wouldve been a LOT better tbh but whatever
                         [ 0, 255, 255 ],
                         [ 255, 0, 255 ],
                         [ 255, 255, 0 ]

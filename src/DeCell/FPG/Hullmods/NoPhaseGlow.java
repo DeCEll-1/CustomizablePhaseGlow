@@ -1,6 +1,7 @@
 package DeCell.FPG.Hullmods;
 
 import DeCell.FPG.FancyPhaseGlow;
+import DeCell.FPG.JavaSlop.ShaderJsonParsing.ShaderJsonModel;
 import DeCell.FPG.Reflection.Reflections;
 import DeCell.FPG.Shader;
 import com.fs.graphics.Sprite;
@@ -29,27 +30,10 @@ public class NoPhaseGlow extends BaseHullMod {
     private static long startTime = System.currentTimeMillis();
     private static final String glow1Appendance = "_glow1";
     private static final String glow2Appendance = "_glow2";
-    public static Shader shader = null;
-    private static final String VERT_PATH = "data/shaders/fpg/main.vert";
-    private static final String FRAG_PATH = "data/shaders/fpg/radial.frag";
-    public static String vert;
-    public static String frag;
 
     @Override
     public void init(HullModSpecAPI spec) {
         super.init(spec);
-        loadShader();
-    }
-
-    private void loadShader() {
-        try {
-            vert = Global.getSettings().loadText(VERT_PATH);
-            frag = Global.getSettings().loadText(FRAG_PATH);
-            if (shader != null)
-                shader.dispose();
-            shader = new Shader(vert, frag).init();
-        } catch (IOException e) {
-        }
     }
 
     private static String getCompleteFilePathOfShipOverlay(ShipAPI ship, String appendance) {
@@ -87,10 +71,16 @@ public class NoPhaseGlow extends BaseHullMod {
                 if (this.texture == null)
                     return;
 
+                // TODO: use unobfuscated names
                 this.texture.Ø00000(); // bind texture
+                ShaderJsonModel shaderData = FancyPhaseGlow.getShaderForShip(ship);
 
-                if (shader != null) {
+                if (shaderData != null && shaderData.getShader() != null) {
+                    Shader shader = shaderData.getShader();
                     shader.bind();
+
+
+                    shaderData.updateUniformValues(ship, this);
 
                     Color[] colorData = Arrays.asList(
                             new Color(0, 255, 255),
@@ -174,8 +164,8 @@ public class NoPhaseGlow extends BaseHullMod {
                 if (useClamp) {
                     B.Ò00000(); // disable clamp
                 }
-                if (shader != null) {
-                    shader.unbind();
+                if (shaderData != null && shaderData.getShader() != null) {
+                    shaderData.getShader().unbind();
                 }
             }
         };
@@ -203,10 +193,6 @@ public class NoPhaseGlow extends BaseHullMod {
         customHighlightSprite.setCenter(tmp.getCenterX(), tmp.getCenterY());
         customHighlightSprite.setOffset(tmp.getOffsetX(), tmp.getOffsetY());
         highlightSpriteHandle.set(((Ship) ship).getPhaseCloak(), customHighlightSprite);
-
-        if (FancyPhaseGlow.Debug) {
-            loadShader();                    // Re-load every time for easy debugging
-        }
     }
 
     private static VarHandle diffuseSpriteHandle;
