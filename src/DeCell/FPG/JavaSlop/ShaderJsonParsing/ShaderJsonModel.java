@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ShaderJsonModel {
     public String title;
@@ -37,6 +38,14 @@ public class ShaderJsonModel {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ShaderUniformModel getUniformFromName(String name) {
+        for (ShaderUniformModel uniform : this.uniforms) {
+            if (Objects.equals(uniform.name, name))
+                return uniform;
+        }
+        return null;
     }
 
     public Shader compile() {

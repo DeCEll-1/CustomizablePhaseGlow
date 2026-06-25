@@ -17,6 +17,7 @@ public class ColorPickerV2Dialogue implements Dialogueable<ColorPickerV2> {
                 .Builder(ColorPickerV2.sizeRect.w, ColorPickerV2.sizeRect.h,
                 btn
         ).withCharlie().build(UIElements)
+                .showCloseButton(false)
                 .addToInternalData(externalData)
                 .addToInternalData("externalData", externalData) // need to set these accessable by the inner element as well
                 .addToInternalData("on_close", onClose)

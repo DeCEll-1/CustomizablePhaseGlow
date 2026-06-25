@@ -13,6 +13,7 @@ public class ModPlugin extends BaseModPlugin {
 
         FancyPhaseGlow.Debug = Global.getSettings().getBoolean("fpg_debug");
         FancyPhaseGlow.DebugUI = Global.getSettings().getBoolean("fpg_debug_ui");
+        FancyPhaseGlow.DebugUIHighlightCharlie = Global.getSettings().getBoolean("fpg_debug_ui_highlight_charlie");
 
 
     }

@@ -42,12 +42,12 @@ public class Slider extends UIContainer<Slider, UIComponentAPI> {
         this.handle.name = "Slider_handle_" + this.handle.name;
         slider.addElement(this);
         Scroll scrollGear = new Scroll();
-        slider.setOnHover(scrollGear::onHover);
+        slider.addOnHover(scrollGear::onHover);
         scrollGear.addScrollListener(s -> {
             handleRelativeX += s;
             updateHandle();
         });
-        slider.setOnMouseDown(this::onSliderClick);
+        slider.addOnMouseDown(this::onSliderClick);
 
         handle.inTL(0 - halfHandleWidth, handleTLPadding);
 

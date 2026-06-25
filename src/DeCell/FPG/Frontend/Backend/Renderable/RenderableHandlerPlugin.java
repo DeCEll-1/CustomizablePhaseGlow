@@ -125,4 +125,9 @@ public class RenderableHandlerPlugin extends PanelPlugin {
                         || renderAboves.stream().anyMatch(PluginRenderable::needsUpdate)
                         || debugRenderable.stream().anyMatch(PluginRenderable::needsUpdate);
     }
+
+    public RenderableHandlerPlugin cleanDebugRenderables() {
+        this.debugRenderable.clear();
+        return this;
+    }
 }

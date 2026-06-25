@@ -41,7 +41,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         this.parent.name = "DialougeButtonPanel_parent_" + _parent.name;
         setIgnoreEvents(true);
 
-        this.button.setOnMouseDown(this::click);
+        this.button.addOnMouseDown(this::click);
     }
 
     public DialougeButtonPanel(float w, float h, MyButton _button, MyPanel _parent) {
@@ -56,7 +56,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         this.button.name = "DialougeButtonPanel_button_" + _button.name;
         this.parent.name = "DialougeButtonPanel_parent_" + _parent.name;
 
-        this.button.setOnMouseDown(this::click);
+        this.button.addOnMouseDown(this::click);
     }
 
 
@@ -79,19 +79,17 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
                                                     e.consume();
                                                 }
                                             }
-
-                                            events.forEach($_ -> {
-                                                $_.consume();
-                                            });
+                                            events.forEach(InputEventAPI::consume);
                                         }
                                 )
                         )
                 )
                 .build(this.u).setConsumeEvents(false).inBL(0, 0).addTo(UIElements);
+        this.container.setParent(this);
 
 
-        // the X button stays as it doesnt *really* batter if its unvisible
-        new MyButton.Builder("X", 24, 24, container).build().inTR(0, 0);
+        if (this.showCloseButton)
+            new MyButton.Builder("X", 24, 24, container).build().inTR(0, 0);
     }
 
     public DialougeButtonPanel(CustomPanelAPI underlying) {
@@ -101,6 +99,11 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
     protected TriConsumer<MyPanel, DialougeButtonPanel, List<UIElement<?, ?>>> onUIOpen;
     protected Consumer<DialougeButtonPanel> onUIClose;
 
+    @Override
+    public void markForDeletion() {
+        super.markForDeletion();
+    }
+
     private void click(MyButton b) {
         click();
     }
@@ -108,7 +111,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
     private void click() {
 
         if (isOpen) {
-            this.u.removeComponent(container.u);
+            container.markForDeletion();
             if (onUIClose != null)
                 onUIClose.accept(this);
         } else {
@@ -128,6 +131,18 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
 
     public DialougeButtonPanel setOnUIClose(Consumer<DialougeButtonPanel> onClick) {
         this.onUIClose = onClick;
+        return this;
+    }
+
+    private boolean showCloseButton = true;
+
+    public DialougeButtonPanel showCloseButton(boolean show) {
+        this.showCloseButton = show;
+        return this;
+    }
+
+    public DialougeButtonPanel setCloseButton(MyButton btn) {
+        btn.addOnMouseDown(this::click);
         return this;
     }
 

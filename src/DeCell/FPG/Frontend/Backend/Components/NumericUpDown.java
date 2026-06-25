@@ -52,14 +52,14 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
 
         this.setValue(0, false);
 
-        up.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.UP));
-        down.setOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.DOWN));
+        up.addOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.UP));
+        down.addOnMouseDown(this::buttonUpdate).addToInternalData(pair("type", UpDownArrow.ButtonType.DOWN));
 
 
         Scroll scrollGear = new Scroll();
-        tb.setOnHover(scrollGear::onHover);
-        up.setOnHover(scrollGear::onHover);
-        down.setOnHover(scrollGear::onHover);
+        tb.addOnHover(scrollGear::onHover);
+        up.addOnHover(scrollGear::onHover);
+        down.addOnHover(scrollGear::onHover);
         scrollGear.addScrollListener(this::onScrollEnd);
 
         this.upDownArrowGear = new UpDownArrow(intervalMin, intervalMax, initialDelay);

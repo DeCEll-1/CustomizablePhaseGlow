@@ -27,10 +27,10 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
         _parent.addElement(this);
         this.button = _btn;
         this.parent = _parent;
-        button.setOnMouseDown(this::click);
+        button.addOnMouseDown(this::click);
     }
 
-    public MyCombobox setOnUpdate(BiConsumer<MyCombobox, ComboboxElement> onChange) {
+    public MyCombobox setOnChange(BiConsumer<MyCombobox, ComboboxElement> onChange) {
         this.onChange = onChange;
         return this;
     }
@@ -74,7 +74,7 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
                     .inTL(new Vector2f(0, topPadding))
                     .setCustomData(element.data)
                     .addToInternalData(pair("index", i))
-                    .setOnMouseDown(b ->
+                    .addOnMouseDown(b ->
                             setIndex(b.getFromInternal("index"))
                     );
         }
@@ -100,7 +100,7 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
 
     private void closeList() {
         listOpen = false;
-        parent.tryRemoveComponent(container);
+        container.markForDeletion();
     }
 
     public static class Builder extends BaseBuilder<Builder> {

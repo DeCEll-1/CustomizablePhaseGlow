@@ -1,16 +1,14 @@
 package DeCell.FPG.JavaSlop.ShaderJsonParsing;
 
-import DeCell.FPG.Frontend.Backend.Components.ColorPicker.ColorPickerV2;
+import DeCell.FPG.FancyPhaseGlow;
+import DeCell.FPG.Frontend.Backend.Components.*;
 import DeCell.FPG.Frontend.Backend.Components.Dialogues.ColorPickerV2Dialogue;
-import DeCell.FPG.Frontend.Backend.Components.DialougeButtonPanel;
-import DeCell.FPG.Frontend.Backend.Components.MyButton;
-import DeCell.FPG.Frontend.Backend.Components.MyPanel;
-import DeCell.FPG.Frontend.Backend.Components.NumericUpDown;
-import DeCell.FPG.Frontend.Backend.DataPair;
+import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.Frontend.Backend.UIElement;
 import DeCell.FPG.ShaderUniformManager;
 import com.fs.graphics.Sprite;
 import com.fs.starfarer.api.combat.ShipAPI;
+import com.fs.starfarer.combat.entities.Ship;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,64 +78,93 @@ public class ShaderUniformModel {
         }
     }
 
-    public MyPanel createUniformModal(MyPanel parent) {
-        MyPanel container = new MyPanel.Builder(280, 80).build(parent);
+    public MyPanel createUniformModal(MyPanel parent, Ship ship) {
+        MyPanel container = new MyPanel.Builder(280, 80).setPlugin(
+                new RenderableHandlerPlugin()
+        ).build(parent);
+
+
+        MyLabel text = new MyLabel
+                .Builder(getLabelText(ship), 80, 24, container)
+                .build()
+                .inTL(2, 2);
 
         Vector2f modalSize = new Vector2f(20, 20);
-
-        MyButton openerButton = new MyButton.Builder("Edit", 60, 24, container).build().inBR(2, 2);
 
         switch (this.type) {
             case INT, FLOAT -> modalSize = new Vector2f(280, 20);
             case VEC3 -> modalSize = new Vector2f(280, 180);
         }
 
+        MyButton openerButton = new MyButton.Builder("Edit", 60, 24, container).build().inBR(2, 2);
         if (this.type == UniformType.COL3) {
             new ColorPickerV2Dialogue().popup(
                     openerButton,
                     parent.getUIElements(),
-                    colorPickerV2 -> colorPickerV2.
-                            <MyPanel>getFromInternal("master")
-                            .addToInternalData(this.name, colorPickerV2.getColor()),
-                    pair("master", parent)
+                    colorPickerV2 -> {
+                        ShipAPI _ship = colorPickerV2.<Ship>getFromInternal("currShip");
+                        FancyPhaseGlow.setShipProperty(_ship, this.name, colorPickerV2.getColor());
+
+                        MyLabel _text = colorPickerV2.getFromInternal("text");
+                        _text.setText(this.getLabelText(_ship));
+                    },
+                    pair("currShip", ship),
+                    pair("text", text)
             );
             return container;
         }
 
-
         DialougeButtonPanel modal = new DialougeButtonPanel.Builder(modalSize.x, modalSize.y, openerButton)
                 .withCharlie().build(parent.getUIElements())
-                .addToInternalData("master", parent)
+                .addToInternalData("currShip", ship)
                 .addToInternalData("uniform", this)
-                .setOnUIOpen(ShaderUniformModel::onModalOpen);
+                .addToInternalData("text", text)
+                .showCloseButton(false)
+                .setOnUIOpen(ShaderUniformModel::onModalOpen)
+                .setOnUIClose(ShaderUniformModel::onModalClose);
 
         return container;
+    }
+
+
+    public String getLabelText(ShipAPI ship) {
+        return this.name + ": " + FancyPhaseGlow.getShipProperty(ship, this.name);
     }
 
     private static void onModalOpen(MyPanel parent, DialougeButtonPanel modal, List<UIElement<?, ?>> IUElements) {
         MyPanel master = modal.getFromInternal("master");
         ShaderUniformModel uniform = modal.getFromInternal("uniform");
+        Ship currShip = modal.getFromInternal("currShip");
 
         switch (uniform.type) {
             case INT, FLOAT -> {
-                NumericUpDown nud = new NumericUpDown.Builder().build(200, parent).inLMid(0);
-                new MyButton.Builder("Accept", 80, 20, parent).build().inRMid(0)
+                NumericUpDown nud = new NumericUpDown.Builder().build(190, parent).inLMid(0)
+                        .setValue(FancyPhaseGlow.<Number>getShipProperty(currShip, uniform.name).doubleValue(), false);
+                MyButton acceptButton = new MyButton.Builder("Accept", 70, 20, parent).build().inRMid(0)
                         .addToInternalData("nud", nud)
-                        .addToInternalData("master", master)
+                        .addToInternalData("currShip", currShip)
                         .addToInternalData("uniform", uniform)
-                        .setOnMouseDown(btn -> {
+                        .addOnMouseDown(btn -> {
                             double val = btn.<NumericUpDown>getFromInternal("nud").getValue();
-                            btn.<MyPanel>getFromInternal("master")
-                                    .addToInternalData(
-                                            btn.<ShaderUniformModel>getFromInternal("uniform").name,
-                                            val
-                                    );
+                            FancyPhaseGlow.setShipProperty(
+                                    btn.<Ship>getFromInternal("currShip"),
+                                    btn.<ShaderUniformModel>getFromInternal("uniform").name,
+                                    val);
                         });
+                modal.setCloseButton(acceptButton);
             }
             case COL3_ARRAY -> { // TODO: uhhhh make a scrollbar
 
             }
         }
+
+    }
+
+    private static void onModalClose(DialougeButtonPanel modal) {
+        ShaderUniformModel uniform = modal.getFromInternal("uniform");
+        Ship currShip = modal.getFromInternal("currShip");
+        MyLabel _text = modal.getFromInternal("text");
+        _text.setText(uniform.getLabelText(currShip));
     }
 
     public void update(ShaderUniformManager s, ShipAPI ship, Sprite sprite) {

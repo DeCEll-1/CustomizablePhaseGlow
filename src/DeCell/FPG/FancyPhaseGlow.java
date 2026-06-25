@@ -2,6 +2,7 @@ package DeCell.FPG;
 
 import DeCell.FPG.JavaSlop.ShaderJsonParsing.ShaderJsonModel;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ModSpecAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import org.apache.log4j.Priority;
 import org.json.JSONArray;
@@ -9,69 +10,71 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL14.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL21.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.*;
-import static org.lwjgl.opengl.GL32.*;
-import static org.lwjgl.opengl.GL33.*;
-import static org.lwjgl.opengl.GL40.*;
-import static org.lwjgl.opengl.GL41.*;
-import static org.lwjgl.opengl.GL42.*;
-import static org.lwjgl.opengl.GL43.*;
-import static org.lwjgl.opengl.GL44.*;
-import static org.lwjgl.opengl.GL45.*;
 // i would global static these if java had that feature
 
 public class FancyPhaseGlow {
     public static boolean Debug = false;
     public static boolean DebugUI = false;
+    public static boolean DebugUIHighlightCharlie = true;
 
     public static List<ShaderJsonModel> PhaseShaders = new ArrayList<>();
     public final static String FPGPrefix = "FPG_";
     public final static String ShipPrefix = "ShaderShip_";
 
+    public static String getKeyFromShip(ShipAPI ship) {
+        return FPGPrefix + ShipPrefix + ship.getFleetMemberId();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> getShipDataMap(ShipAPI ship) {
+        String key = getKeyFromShip(ship);
+        Map<String, Object> persistentData = Global.getSector().getPersistentData();
+
+        if (!persistentData.containsKey(key) || !(persistentData.get(key) instanceof HashMap<?, ?>)) {
+            persistentData.put(key, new HashMap<String, Object>());
+        }
+
+        return (Map<String, Object>) persistentData.get(key);
+    }
+
     public static ShaderJsonModel getShaderForShip(ShipAPI ship) {
-        String key = FPGPrefix + ShipPrefix + ship.getFleetMemberId();
+        Map<String, Object> shipData = getShipDataMap(ship);
 
-        if (!Global.getSector().getPersistentData().containsKey(key))
-            return null;
-
-        Object data = Global.getSector().getPersistentData().get(key);
-        String shaderId = (String) data;
+        String shaderId = (String) shipData.get("shaderId");
         if (shaderId == null) return null;
 
-        // TODO: make a system for per ship shader editing
         for (ShaderJsonModel phaseShader : PhaseShaders) {
             if (Objects.equals(phaseShader.id, shaderId))
                 return phaseShader;
-            // java streams suck im missing LINQ :(
         }
         return null;
     }
 
     public static void setShaderForShip(ShipAPI ship, ShaderJsonModel shaderJsonModel) {
-        String key = FPGPrefix + ShipPrefix + ship.getFleetMemberId();
+        setShipProperty(ship, "shaderId", shaderJsonModel.id);
+    }
 
-        if (shaderJsonModel == null) {
-            Global.getSector().getPersistentData().remove(key);
-            return;
+    public static void setShipProperty(ShipAPI ship, String name, Object val) {
+        getShipDataMap(ship).put(name, val);
+        if (Debug)
+            Log("Updated property of " + getKeyFromShip(ship) + " with " + val);
+    }
+
+    public static <T> T getShipProperty(ShipAPI ship, String name) {
+        Object prop = getShipDataMap(ship).get(name);
+        if (prop == null) {
+            prop = getShaderForShip(ship).getUniformFromName(name).value;
+            setShipProperty(ship, name, prop);
         }
-        Global.getSector().getPersistentData().put(key, shaderJsonModel.id);
+
 
         if (Debug)
-            Log("PUT " + shaderJsonModel + " TO " + key);
+            Log("Got ship property of " + getKeyFromShip(ship) + " with " + prop);
+
+        return (T) prop;
+
     }
 
     public static void Log(String s) {
@@ -92,7 +95,35 @@ public class FancyPhaseGlow {
         }
         PhaseShaders.clear();
         try {
-            JSONObject master = Global.getSettings().getMergedJSON("data/shaders/fpg/PhaseShaders.hjson");
+            JSONObject master = new JSONObject();
+
+            for (ModSpecAPI modSpecAPI : Global.getSettings().getModManager().getAvailableModsCopy()) {
+                try {
+                    String modJson = "";
+                    try {
+                        modJson = Global.getSettings().loadText("data/shaders/fpg/PhaseShaders.json", modSpecAPI.getId());
+                        // when life gives you bad apis you try and catch
+                    } catch (Exception e) { continue; }
+                    // yes this regex is bad for sanitising properly as it does not take into account the slashes in strings,
+                    // however for the purposes of this it does not matter
+                    String sanitizedJson = modJson.replaceAll("//.*", "");
+
+                    // Now parse the sanitized string safely
+                    JSONObject currentModObj = new JSONObject(sanitizedJson);
+
+                    Iterator<?> keys = currentModObj.keys();
+                    while (keys.hasNext()) {
+                        String key = (String) keys.next();
+                        Object value = currentModObj.get(key);
+
+                        master.put(key, value);
+                    }
+                } catch (Exception e) {
+                    LogErr("Error loading shader JSON for mod: " + modSpecAPI.getId());
+                    throw e;
+                }
+            }
+
             JSONArray masterArray = master.getJSONArray("Shaders");
             for (int i = 0; i < masterArray.length(); i++) {
                 ShaderJsonModel zaza = new ShaderJsonModel(masterArray.getJSONObject(i));
@@ -105,7 +136,7 @@ public class FancyPhaseGlow {
                 PhaseShaders.add(zaza);
             }
 
-        } catch (IOException | JSONException e) { // İ HATE YOU JAVA, İ HATE YOU
+        } catch (JSONException e) { // İ HATE YOU JAVA, İ HATE YOU
             throw new RuntimeException("IRONED WITH HATE, FUELED BY SPITE\n" + e.getMessage());
         }
     }

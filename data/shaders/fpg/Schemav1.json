@@ -96,6 +96,10 @@
                                 "Modifyable": {
                                     "type": "boolean",
                                     "default": false
+                                },
+                                "StepSize": {
+                                    "type": "number",
+                                    "default": 1.0
                                 }
                             },
                             "additionalProperties": false,
@@ -247,6 +251,28 @@
                                             }
                                         }
                                     ]
+                                },
+                                { // step size
+                                    "if": {
+                                        "properties": {
+                                            "Value": {
+                                                "not": {
+                                                    "anyOf": [
+                                                        { "type": "number" },
+                                                        {
+                                                            "type": "array",
+                                                            "items": { "type": "number" }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "StepSize": false
+                                        }
+                                    }
                                 }
                             ]
                         },

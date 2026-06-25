@@ -1,5 +1,6 @@
 package DeCell.FPG.Frontend.Backend.Components.Charlie;
 
+import DeCell.FPG.FancyPhaseGlow;
 import DeCell.FPG.Frontend.Backend.UIContainer;
 import DeCell.FPG.Frontend.Backend.Components.MyPanel;
 import DeCell.FPG.Frontend.Backend.Plugins.MultiPluginHandler;
@@ -17,14 +18,19 @@ public class CharlieElement extends UIContainer<CharlieElement, CustomPanelAPI> 
 
     public CharlieElement(MyPanel _parent) {
         super(_parent.u.createCustomPanel(_parent.w(), _parent.h(), new MultiPluginHandler()));
+        this.setConsumeEvents(false);
         this.name = "Charlie_" + this.name;
         _parent.addComponent(this.u).inBL(0, 0);
         this.parent = _parent;
         this.parent.name = "Charlie_parent_" + this.parent.name;
         parent.addElement(this);
+        parent.setConsumeEvents(false);
 
         this.plugin = ((MultiPluginHandler) this.u.getPlugin());
-        this.plugin.add(new RenderableHandlerPlugin().addBelow(background));
+        RenderableHandlerPlugin renderHandler = new RenderableHandlerPlugin().addBelow(background);
+        this.plugin.add(renderHandler);
+        if (!FancyPhaseGlow.DebugUIHighlightCharlie)
+            renderHandler.cleanDebugRenderables();
         this.plugin.update(this.u);
 
         this.update();

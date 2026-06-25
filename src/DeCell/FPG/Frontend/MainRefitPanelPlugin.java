@@ -6,6 +6,7 @@ import DeCell.FPG.Frontend.Backend.Components.*;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.ComboboxElement;
 import DeCell.FPG.Frontend.Backend.Components.Combobox.MyCombobox;
 import DeCell.FPG.Frontend.Backend.Plugins.PanelPlugin;
+import DeCell.FPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.FPG.JavaSlop.ShaderJsonParsing.ShaderJsonModel;
 import DeCell.FPG.JavaSlop.ShaderJsonParsing.ShaderUniformModel;
 import DeCell.FPG.Reflection.InputEventAPICreator;
@@ -43,23 +44,20 @@ public class MainRefitPanelPlugin extends PanelPlugin {
             cb.addItem(new ComboboxElement(phaseShader.title, phaseShader));
         }
 
-        ShaderJsonModel curr = FancyPhaseGlow.getShaderForShip(currShip);
-        if (curr != null)
-            cb.setIndex(FancyPhaseGlow.PhaseShaders.indexOf(curr));
-
-
         cb.addToInternalData("currShip", currShip)
-                .addToInternalData("parent", parent);
-        cb.setOnUpdate((c, el) -> {
+                .addToInternalData("parent", parent).update();
+        cb.setOnChange((c, el) -> {
             Ship _currShip = c.getFromInternal("currShip");
             FancyPhaseGlow.setShaderForShip(_currShip, (ShaderJsonModel) el.data);
 
             MyPanel uniformsPanel = c.getFromInternal("uniformsPanel");
             MyPanel _parent = c.getFromInternal("parent");
             if (uniformsPanel != null)
-                _parent.tryRemoveComponent(uniformsPanel);
+                uniformsPanel.markForDeletion();
 
-            uniformsPanel = new MyPanel.Builder(300, 600).build(_parent.inRMid(20));
+            uniformsPanel = new MyPanel.Builder(300, 600).setPlugin(
+                    new RenderableHandlerPlugin()
+            ).build(_parent).inRMid(20);
             c.addToInternalData("uniformsPanel", uniformsPanel);
 
             ShaderJsonModel selectedShader = FancyPhaseGlow.getShaderForShip(_currShip);
@@ -69,7 +67,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
             for (ShaderUniformModel uniform : selectedShader.uniforms) {
                 if (!uniform.modifyable)
                     continue;
-                MyPanel uniformContainer = uniform.createUniformModal(_parent);
+                MyPanel uniformContainer = uniform.createUniformModal(uniformsPanel, _currShip);
 
                 if (lastSibling == null)
                     uniformContainer.inTMid(10);
@@ -78,9 +76,11 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
                 lastSibling = uniformContainer;
             }
-
-
         });
+
+        ShaderJsonModel curr = FancyPhaseGlow.getShaderForShip(currShip);
+        if (curr != null)
+            cb.setIndex(FancyPhaseGlow.PhaseShaders.indexOf(curr));
 
 
 //                    new ColorPickerV2Dialogue().popup(

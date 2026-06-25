@@ -102,7 +102,7 @@ public class ColorPickerV2 extends UIContainer<ColorPickerV2, UIComponentAPI> {
         ySlider.setOnChange(this::updateNuds);
         zSlider.setOnChange(this::updateNuds);
 
-        colorPickerPanel.setOnHover(s -> {
+        colorPickerPanel.addOnHover(s -> {
             if (s.isDragging())
                 updateFromPanelAndSlider();
         });
