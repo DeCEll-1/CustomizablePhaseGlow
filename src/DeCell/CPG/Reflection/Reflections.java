@@ -161,6 +161,121 @@ public class Reflections {
         return privateLookup.findVarHandle(targetClass, fieldName, fieldType);
     }
 
+    public static String getFieldName(Object field) {
+        if (field == null) {
+            return null;
+        }
+        try {
+            return (String) Reflections.getFieldNameHandle.invoke(field);
+        } catch (Throwable t) {
+            // Fallback or log if necessary, otherwise fail gracefully under sandbox restrictions
+            return null;
+        }
+    }
+
+    public static Object findConstructor(Class<?> targetClass, Class<?>... parameterTypes) {
+        if (targetClass == null) {
+            throw new IllegalArgumentException("Target class cannot be null");
+        }
+
+        Class<?>[] paramTypes = (parameterTypes != null) ? parameterTypes : new Class<?>[0];
+
+        try {
+            // 1. Fetch all declared constructors blindly as an Object[] using your pre-built handle
+            Object[] constructors = (Object[]) getDeclaredConstructorsHandle.invoke(targetClass);
+
+            for (Object constructor : constructors) {
+                // 2. Extract the parameter types using your pre-built handle
+                Class<?>[] currentParamTypes = (Class<?>[]) getConstructorParameterTypesHandle.invoke(constructor);
+
+                // Compare length first
+                if (currentParamTypes.length != paramTypes.length) {
+                    continue;
+                }
+
+                // Compare exact types
+                boolean match = true;
+                for (int i = 0; i < currentParamTypes.length; i++) {
+                    if (currentParamTypes[i] != paramTypes[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    // 3. Target found! Force accessibility blindly using your pre-built handle
+                    setConstructorAccessibleHandle.invoke(constructor, true);
+                    return constructor;
+                }
+            }
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed to scan or access constructors for " + targetClass.getName(), t);
+        }
+
+        return null; // Return null if no matching constructor exists
+    }
+
+    public static Object newInstance(Object constructor, Object... args) {
+        if (constructor == null) {
+            throw new IllegalArgumentException("Constructor cannot be null");
+        }
+        Object[] methodArgs = (args != null) ? args : new Object[0];
+
+        try {
+            // Use your pre-configured constructorNewInstanceHandle:
+            // MethodType.methodType(Object.class, Object[].class)
+            // It takes the constructor object as the first parameter, and the args array as the second.
+            return constructorNewInstanceHandle.invoke(constructor, methodArgs);
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed to blindly instantiate object via constructor", t);
+        }
+    }
+
+    public static Object newInstance(Class<?> clazz, Object... args) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("Target class cannot be null");
+        }
+
+        Object[] methodArgs = (args != null) ? args : new Object[0];
+        Class<?>[] parameterTypes = new Class<?>[methodArgs.length];
+
+        for (int i = 0; i < methodArgs.length; i++) {
+            if (methodArgs[i] == null) {
+                parameterTypes[i] = Object.class;
+            } else {
+                Class<?> argClass = methodArgs[i].getClass();
+
+                if (argClass == Integer.class) parameterTypes[i] = int.class;
+                else if (argClass == Boolean.class) parameterTypes[i] = boolean.class;
+                else if (argClass == Long.class) parameterTypes[i] = long.class;
+                else if (argClass == Float.class) parameterTypes[i] = float.class;
+                else if (argClass == Double.class) parameterTypes[i] = double.class;
+                else if (argClass == Byte.class) parameterTypes[i] = byte.class;
+                else if (argClass == Character.class) parameterTypes[i] = char.class;
+                else if (argClass == Short.class) parameterTypes[i] = short.class;
+                else parameterTypes[i] = argClass;
+            }
+        }
+
+        return newInstance(clazz, parameterTypes, methodArgs);
+    }
+
+    public static Object newInstance(Class<?> clazz, Class<?>[] parameterTypes, Object... args) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("Target class cannot be null");
+        }
+
+        // 1. Resolve the constructor dynamically using your signature-blind method
+        Object constructor = findConstructor(clazz, parameterTypes);
+        if (constructor == null) {
+            throw new RuntimeException("No constructor found for " + clazz.getName() +
+                    " matching parameters: " + java.util.Arrays.toString(parameterTypes));
+        }
+
+        // 2. Safely execute it using your existing array-based utility structure
+        return newInstance(constructor, args);
+    }
 
     public static Object invokeMethod(String methodName, Object target) {
         if (target == null || methodName == null || methodName.isEmpty()) {
@@ -261,6 +376,108 @@ public class Reflections {
 
         } catch (Throwable t) {
             throw new RuntimeException("Failed to instantiate " + clazz.getName() + " with arguments via MethodHandles", t);
+        }
+    }
+
+    private static Class<?> textureObjectClass = null;
+    private static VarHandle textureObjectIDHandle = null;
+
+    public static int extractTextureID(Object textureInstance) {
+        if (textureInstance == null) return -1;
+        if (textureObjectClass == null) {
+            textureObjectClass = textureInstance.getClass();
+            createTextureObjectIDHandle();
+        }
+
+        if (textureObjectIDHandle == null)
+            return -1;
+
+        try {
+            return (int) textureObjectIDHandle.get(textureInstance);
+        } catch (Throwable t) {
+            return -1;
+        }
+    }
+
+    private static void createTextureObjectIDHandle() {
+        try {
+            Class<?> clazz = textureObjectClass;
+
+            int markerValue = 8675309;
+
+            Object dummyInstance = newInstance(clazz, 0, markerValue);
+
+            Object[] fields = clazz.getDeclaredFields();
+
+            if (fields.length == 0) throw new RuntimeException("No fields found to scan.");
+
+
+            for (Object field : fields) {
+                String fieldName = getFieldName(field);
+
+                try {
+                    VarHandle vh = getVarHandle(clazz, fieldName, int.class);
+
+                    int currentValue = (int) vh.get(dummyInstance);
+
+                    if (currentValue == markerValue) {
+                        textureObjectIDHandle = vh;
+                        break;
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    continue;
+                }
+            }
+
+            if (textureObjectIDHandle == null) {
+                throw new NoSuchFieldException("Could not pinpoint the texture ID field via marker scanning.");
+            }
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed cross-platform VarHandle signature scan", t);
+        }
+    }
+
+    public static void bindTexture(Object textureInstance) {
+        if (textureInstance == null) return;
+
+        try {
+            Class<?> clazz = textureInstance.getClass();
+
+            Object[] methods = clazz.getDeclaredMethods();
+
+            // 2. Scan for the specific signature
+            for (Object method : methods) {
+
+                // Check parameters: Must accept 0 parameters
+                int paramCount = (int) Reflections.getParameterCount.invoke(method);
+                if (paramCount != 0) {
+                    continue;
+                }
+
+                // Check return type: Must be void.class
+                Class<?> returnType = (Class<?>) Reflections.getReturnTypeHandle.invoke(method);
+                if (returnType != void.class) {
+                    continue;
+                }
+
+                // Skip compiler-generated synthetic or bridge methods
+                boolean isSynthetic = (boolean) Reflections.methodIsSynthetic.invoke(method);
+                boolean isBridge = (boolean) Reflections.methodIsBridge.invoke(method);
+                if (isSynthetic || isBridge) {
+                    continue;
+                }
+
+                // 3. Match found. Bypass accessibility restrictions and execute.
+                Reflections.setMethodAccessable.invoke(method, true);
+                Reflections.invokeMethodHandle.invoke(method, textureInstance, new Object[0]);
+
+                return; // Exit after successful execution
+            }
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException("Failed to find or execute the cross-platform void method", t);
         }
     }
 }

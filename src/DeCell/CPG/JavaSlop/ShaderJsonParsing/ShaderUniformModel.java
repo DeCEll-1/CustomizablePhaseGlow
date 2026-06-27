@@ -6,6 +6,8 @@ import DeCell.CPG.Frontend.Backend.Components.Dialogues.ColorPickerV2Dialogue;
 import DeCell.CPG.Frontend.Backend.Renderable.BorderRenderable;
 import DeCell.CPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.CPG.Frontend.Backend.UIElement;
+import DeCell.CPG.Misc;
+import DeCell.CPG.Reflection.Reflections;
 import DeCell.CPG.ShaderUniformManager;
 import com.fs.graphics.Sprite;
 import com.fs.starfarer.api.Global;
@@ -14,6 +16,7 @@ import com.fs.starfarer.combat.entities.Ship;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static DeCell.CPG.Frontend.Backend.DataPair.pair;
+import static DeCell.CPG.Misc.*;
 
 public class ShaderUniformModel {
     public String name;
@@ -94,7 +98,7 @@ public class ShaderUniformModel {
     public MyPanel createUniformModal(MyPanel parent, Ship ship) {
         MyPanel container = new MyPanel.Builder(280, 80).setPlugin(
                 new RenderableHandlerPlugin().addBelow(
-                        new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"))
+                        new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
                                 .setSlices(32)
                                 .setThickness(8)
                                 .setPadding(-8).setRenderInside(true)
@@ -120,10 +124,11 @@ public class ShaderUniformModel {
             new ColorPickerV2Dialogue().popup(
                     openerButton,
                     parent.getUIElements(),
-                    CustomizablePhaseGlow.<Color>getShipProperty(ship, this.name),
+                    floatArrayToColor(CustomizablePhaseGlow.getShipProperty(ship, this.name)),
                     colorPickerV2 -> {
                         ShipAPI _ship = colorPickerV2.<Ship>getFromInternal("currShip");
-                        CustomizablePhaseGlow.setShipProperty(_ship, this.name, colorPickerV2.getColor());
+                        // storing raw color object could be better to not re init a color object constantly, but its too much work
+                        CustomizablePhaseGlow.setShipProperty(_ship, this.name, Misc.colorToFloatArray(colorPickerV2.getColor(), false));
 
                         MyLabel _text = colorPickerV2.getFromInternal("text");
                         _text.setText(this.getLabelText(_ship));
@@ -148,7 +153,7 @@ public class ShaderUniformModel {
 
 
     public String getLabelText(ShipAPI ship) {
-        return this.name + ": " + CustomizablePhaseGlow.getShipProperty(ship, this.name);
+        return this.name + ": " + CustomizablePhaseGlow.getObjectString(CustomizablePhaseGlow.getShipProperty(ship, this.name));
     }
 
     private static void onModalOpen(MyPanel parent, DialougeButtonPanel modal, List<UIElement<?, ?>> IUElements) {
@@ -323,8 +328,8 @@ public class ShaderUniformModel {
                 s.setFloat(this.name, ((Number) val).floatValue());
             }
             case COL3 -> {
-                float[] zaza = (float[]) val;
-                s.setColor3(this.name, new Color((int) zaza[0], (int) zaza[1], (int) zaza[2]));
+                Color zaza = Misc.floatArrayToColor((float[]) val);
+                s.setColor3(this.name, zaza);
             }
             case VEC3 -> {
                 float[] zaza = (float[]) val;
@@ -353,30 +358,6 @@ public class ShaderUniformModel {
                 throw new UnsupportedOperationException("Custom textures is not implemented yet");
             }
         }
-    }
-
-    private static Color[] getColorsFromFloatMatrix(float[][] val) {
-        float[][] zaza = val;
-        Color[] colors = new Color[zaza.length];
-
-        for (int i = 0; i < zaza.length; i++)
-            colors[i] = new Color((int) zaza[i][0], (int) zaza[i][1], (int) zaza[i][2]);
-        return colors;
-    }
-
-    private static float[][] getFloatMatrixFromColors(Color[] colors) {
-        if (colors == null) return null;
-
-        float[][] val = new float[colors.length][3];
-
-        for (int i = 0; i < colors.length; i++) {
-            if (colors[i] != null) {
-                val[i][0] = colors[i].getRed();   // R
-                val[i][1] = colors[i].getGreen(); // G
-                val[i][2] = colors[i].getBlue();  // B
-            }
-        }
-        return val;
     }
 
     private static Object getValOrDefault(ShaderUniformModel uniform, ShipAPI ship, Sprite sprite) {
@@ -414,11 +395,15 @@ public class ShaderUniformModel {
                 return ship.getFluxLevel();
             }
             case HULL -> {
-                return ship.getHitpoints();
+                return ship.getHitpoints() / ship.getMaxHitpoints();
+            }
+            case SPEED -> {
+                return ship.getVelocity().length() / ship.getMaxSpeed();
             }
             case PHASE_TEXTURE -> {
                 if (sprite == null || sprite.getTexture() == null) return 0;
-                return sprite.getTexture().ö00000(); // TODO: fix this to not use obfuscated names
+
+                return Reflections.extractTextureID(sprite.getTexture());
             }
             case TEX_WIDTH -> {
                 return sprite != null ? sprite.getTexWidth() : 1.0f;
@@ -437,6 +422,7 @@ public class ShaderUniformModel {
         PHASE_TEXTURE("phase_texture", UniformType.SAMPLER_2D),
         TEX_WIDTH("texWidth", UniformType.FLOAT),
         TEX_HEIGHT("texHeight", UniformType.FLOAT),
+        SPEED("speed", UniformType.FLOAT),
         ARRAY_LENGTH("array_length", UniformType.INT),
         OTHER("other", null);
 

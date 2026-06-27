@@ -62,6 +62,7 @@
                                                 "time",
                                                 "flux",
                                                 "hull",
+                                                "speed",
                                                 "phase_texture",
                                                 "texWidth", // the texture size in 0-1 range
                                                 // for any non 2^n sprite the game adds padding to make them 2^n
@@ -230,7 +231,7 @@
                                             "description": "Engine string constants must be paired with float",
                                             "properties": {
                                                 "Type": { "const": "float" },
-                                                "Value": { "enum": [ "time", "flux", "hull", "texWidth", "texHeight" ] }
+                                                "Value": { "enum": [ "time", "flux", "hull", "speed", "texWidth", "texHeight" ] }
                                             }
                                         },
                                         {

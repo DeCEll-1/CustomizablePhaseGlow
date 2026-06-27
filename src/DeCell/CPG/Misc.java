@@ -59,4 +59,73 @@ public class Misc {
         return Global.getSettings().getColor("buttonText");
     }
 
+
+    public static Color[] getColorsFromFloatMatrix(float[][] val) {
+        float[][] zaza = val;
+        Color[] colors = new Color[zaza.length];
+
+        for (int i = 0; i < zaza.length; i++)
+            colors[i] = new Color((int) zaza[i][0], (int) zaza[i][1], (int) zaza[i][2]);
+        return colors;
+    }
+
+    public static float[][] getFloatMatrixFromColors(Color[] colors) {
+        if (colors == null) return null;
+
+        float[][] val = new float[colors.length][3];
+
+        for (int i = 0; i < colors.length; i++) {
+            if (colors[i] != null) {
+                val[i][0] = colors[i].getRed();   // R
+                val[i][1] = colors[i].getGreen(); // G
+                val[i][2] = colors[i].getBlue();  // B
+            }
+        }
+        return val;
+    }
+
+    public static Color floatArrayToColor(float[] colorArray) {
+        if (colorArray == null || colorArray.length < 3) {
+            throw new IllegalArgumentException("Array must contain at least 3 elements (RGB).");
+        }
+
+        int r = Math.max(0, Math.min(255, Math.round(colorArray[0])));
+        int g = Math.max(0, Math.min(255, Math.round(colorArray[1])));
+        int b = Math.max(0, Math.min(255, Math.round(colorArray[2])));
+
+        int a = 255;
+        if (colorArray.length >= 4) {
+            a = Math.max(0, Math.min(255, Math.round(colorArray[3])));
+        }
+
+        return new Color(r, g, b, a);
+    }
+
+    public static float[] colorToFloatArray(Color color, boolean includeAlpha) {
+        if (color == null) {
+            throw new IllegalArgumentException("Color object cannot be null.");
+        }
+
+        float[] colorArray = new float[includeAlpha ? 4 : 3];
+
+        colorArray[0] = color.getRed();
+        colorArray[1] = color.getGreen();
+        colorArray[2] = color.getBlue();
+
+        if (includeAlpha) {
+            colorArray[3] = color.getAlpha();
+        }
+
+        return colorArray;
+    }
+
+    public static void enableClamp() {
+        GL11.glTexParameteri(3553, 10242, 33071);
+        GL11.glTexParameteri(3553, 10243, 33071);
+    }
+
+    public static void disableClamp() {
+        GL11.glTexParameteri(3553, 10242, 10497);
+        GL11.glTexParameteri(3553, 10243, 10497);
+    }
 }

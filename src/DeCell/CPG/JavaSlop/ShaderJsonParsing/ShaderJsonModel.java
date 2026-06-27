@@ -39,7 +39,7 @@ public class ShaderJsonModel {
             this.id = jsonObject.getString("ID");
             this.fragmentShaderPath = jsonObject.getString("FragmentShaderPath");
 
-            this.vertexShaderPath = jsonObject.optString("VertexShaderPath", "data/shaders/fpg/main.vert");
+            this.vertexShaderPath = jsonObject.optString("VertexShaderPath", "data/shaders/cpg/main.vert");
 
             this.uniforms = new ArrayList<>();
             if (jsonObject.has("Uniforms")) {

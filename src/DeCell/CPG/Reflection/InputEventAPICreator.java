@@ -1,5 +1,6 @@
 package DeCell.CPG.Reflection;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.input.InputEventClass;
 import com.fs.starfarer.api.input.InputEventType;
@@ -247,12 +248,6 @@ public class InputEventAPICreator {
     private static final Class<?>[] CONSTRUCTOR_SIGNATURE;
 
     static {
-        try {
-            eventImplementationClass = Class.forName("com.fs.starfarer.util.A.C");
-        } catch (ClassNotFoundException e) {
-            eventImplementationClass = null;
-        }
-
         // Pre-define the constructor signature layout to optimize runtime checks
         CONSTRUCTOR_SIGNATURE = new Class<?>[]{
                 InputEventClass.class,
@@ -262,6 +257,18 @@ public class InputEventAPICreator {
                 int.class,
                 char.class
         };
+    }
+    public static void discoverEventClass(List<InputEventAPI> events) {
+        if (eventImplementationClass != null || events == null || events.isEmpty()) {
+            return;
+        }
+
+        for (InputEventAPI event : events) {
+            if (event != null) {
+                eventImplementationClass = event.getClass();
+                return;
+            }
+        }
     }
 
     public static InputEventAPI createEvent(InputEventClass eventClass, InputEventType eventType, int x, int y, int value, char eventChar) {

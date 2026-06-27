@@ -9,13 +9,11 @@ public class ModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() {
-        Global.getLogger(CustomizablePhaseGlow.class).log(Level.INFO, "FPG_Loaded");
+        CustomizablePhaseGlow.Log("CPG_Loaded");
 
-        CustomizablePhaseGlow.Debug = Global.getSettings().getBoolean("fpg_debug");
-        CustomizablePhaseGlow.DebugUI = Global.getSettings().getBoolean("fpg_debug_ui");
-        CustomizablePhaseGlow.DebugUIHighlightCharlie = Global.getSettings().getBoolean("fpg_debug_ui_highlight_charlie");
-
-
+        CustomizablePhaseGlow.Debug = Global.getSettings().getBoolean("cpg_debug");
+        CustomizablePhaseGlow.DebugUI = Global.getSettings().getBoolean("cpg_debug_ui");
+        CustomizablePhaseGlow.DebugUIHighlightCharlie = Global.getSettings().getBoolean("cpg_debug_ui_highlight_charlie");
     }
 
     public void onGameLoad(boolean newGame) {

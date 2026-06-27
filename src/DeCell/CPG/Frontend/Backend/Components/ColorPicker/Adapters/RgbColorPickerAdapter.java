@@ -131,7 +131,7 @@ public class RgbColorPickerAdapter extends ColorPickerAdapter {
 
     @Override
     public Shader getPanelShader() {
-        return Shader.fromFile("data/shaders/fpg/main.vert", "data/shaders/fpg/colorPickerShaders/rgb.frag").init();
+        return Shader.fromFile("data/shaders/cpg/main.vert", "data/shaders/cpg/colorPickerShaders/rgb.frag").init();
     }
 
     @Override

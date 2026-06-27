@@ -72,6 +72,27 @@ public class ShaderUniformManager {
         return this;
     }
 
+    public ShaderUniformManager setVector4(String name, float[] vector) {
+        int loc = getUniformLocation(name);
+        if (loc == -1 || vector == null || vector.length < 4) return this;
+        GL20.glUniform4f(loc, vector[0], vector[1], vector[2], vector[3]);
+        return this;
+    }
+
+    public ShaderUniformManager setVector3(String name, float[] vector) {
+        int loc = getUniformLocation(name);
+        if (loc == -1 || vector == null || vector.length < 3) return this;
+        GL20.glUniform3f(loc, vector[0], vector[1], vector[2]);
+        return this;
+    }
+
+    public ShaderUniformManager setVector2(String name, float[] vector) {
+        int loc = getUniformLocation(name);
+        if (loc == -1 || vector == null || vector.length < 2) return this;
+        GL20.glUniform2f(loc, vector[0], vector[1]);
+        return this;
+    }
+
     // ====================== Primitives ======================
     public ShaderUniformManager setFloat(String name, float value) {
         int loc = getUniformLocation(name);
@@ -190,7 +211,8 @@ public class ShaderUniformManager {
     }
 
     public ShaderUniformManager setColor3(String name, Color color) {
-        setVector3(name, new Vector3f(color.getRed(), color.getGreen(), color.getBlue()));
+        float[] comps = color.getColorComponents(null);
+        setVector3(name, comps);
         return this;
     }
 

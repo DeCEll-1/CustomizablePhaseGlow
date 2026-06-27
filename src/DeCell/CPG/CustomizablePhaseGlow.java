@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class CustomizablePhaseGlow {
     public static boolean Debug = false;
     public static boolean DebugUI = false;
-    public static boolean DebugUIHighlightCharlie = true;
+    public static boolean DebugUIHighlightCharlie = false;
 
     public static List<ShaderJsonModel> PhaseShaders = new ArrayList<>();
     public final static String CPGPrefix = "CPG_";
@@ -62,14 +62,30 @@ public class CustomizablePhaseGlow {
 
     public static void setShipProperty(ShipAPI ship, String name, Object val, boolean log) {
         getShipDataMap(ship).put(name, val);
-        if (Debug && log)
-            Log("Updated property of " + getKeyFromShip(ship) + " with " + val + " for " + name);
+        if (Debug && log) {
+            Log("Updated property of " + getKeyFromShip(ship) + " with " + getObjectString(val) + " for " + name);
+        }
+    }
+
+    public static String getObjectString(Object val) {
+        if (val != null && val.getClass().isArray())
+            if (val instanceof float[] floatArray)
+                return Arrays.toString(floatArray);
+            else if (val instanceof float[][] floatMatrix)
+                return Arrays.deepToString(floatMatrix);
+            else
+                return Arrays.deepToString((Object[]) val);
+        else if (val != null)
+            return val.toString();
+        else
+            return "null";
     }
 
     public static <T> T getShipProperty(ShipAPI ship, String name) {
         Object prop = getShipDataMap(ship).get(name);
-        if (prop == null) {
-            prop = getShaderForShip(ship).getUniformFromName(name).value;
+        ShaderJsonModel shipShader = getShaderForShip(ship);
+        if (prop == null && shipShader != null) {
+            prop = shipShader.getUniformFromName(name).value;
             setShipProperty(ship, name, prop);
         }
 

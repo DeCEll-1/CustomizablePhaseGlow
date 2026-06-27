@@ -5,7 +5,7 @@
             "ID": "cpg_radial",
             "Title": "Radial",
             "FragmentShaderPath": "./radial.frag", // dot (.) at the start of the file path is a hard coded special case
-            // it will replace the dot with data/shaders/fpg
+            // it will replace the dot with data/shaders/cpg
             // vertex shader is not necessary as its not rly usefull in this case
             "Uniforms": [
                 {
@@ -62,6 +62,111 @@
                     "Name": "texHeight",
                     "Type": "float",
                     "Value": "texHeight"
+                }
+            ]
+        },
+        {
+            "ID": "cpg_flux_shift",
+            "Title": "Flux Color Shift",
+            "FragmentShaderPath": "./flux_shift.frag",
+            "Uniforms": [
+                {
+                    "Name": "textureSampler",
+                    "Type": "sampler2D",
+                    "Value": "phase_texture"
+                },
+                {
+                    "Name": "flux",
+                    "Type": "float",
+                    "Value": "flux"
+                },
+                {
+                    "Name": "lowFluxColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 255.0, 0.0, 255.0 ]
+                },
+                {
+                    "Name": "highFluxColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 255.0, 0.0, 0.0 ]
+                }
+            ]
+        },
+        {
+            "ID": "cpg_hull_shift",
+            "Title": "Hull Health Color Shift",
+            "FragmentShaderPath": "./hull_shift.frag",
+            "Uniforms": [
+                {
+                    "Name": "textureSampler",
+                    "Type": "sampler2D",
+                    "Value": "phase_texture"
+                },
+                {
+                    "Name": "hull",
+                    "Type": "float",
+                    "Value": "hull"
+                },
+                {
+                    "Name": "lowHullColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 255.0, 0.0, 0.0 ]
+                },
+                {
+                    "Name": "highHullColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 255.0, 0.0, 255.0 ]
+                }
+            ]
+        },
+        {
+            "ID": "cpg_speed_glow",
+            "Title": "Speed Velocity Glow",
+            "FragmentShaderPath": "./speed_glow.frag",
+            "Uniforms": [
+                {
+                    "Name": "textureSampler",
+                    "Type": "sampler2D",
+                    "Value": "phase_texture"
+                },
+                {
+                    "Name": "speed",
+                    "Type": "float",
+                    "Value": "speed"
+                },
+                {
+                    "Name": "lowSpeedColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 0.0, 50.0, 200.0 ]
+                },
+                {
+                    "Name": "highSpeedColor",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 0.0, 255.0, 255.0 ]
+                }
+            ]
+        },
+        {
+            "ID": "cpg_monocolor",
+            "Title": "Change Color",
+            "FragmentShaderPath": "./mono_color.frag",
+            "Uniforms": [
+                {
+                    "Name": "textureSampler",
+                    "Type": "sampler2D",
+                    "Value": "phase_texture"
+                },
+                {
+                    "Name": "color",
+                    "Type": "col3",
+                    "Modifyable": true,
+                    "Value": [ 255.0, 0.0, 255.0 ]
                 }
             ]
         }

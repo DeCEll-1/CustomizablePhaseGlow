@@ -34,6 +34,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
     }
 
     private static void onUIOpen(MyPanel parent, DialougeButtonPanel dialogue, List<UIElement<?, ?>> _UIElements) {
+        // TODO: implement a preview section here
         Ship currShip = dialogue.getFromInternal("ship");
 
         MyCombobox cb = MyCombobox.Builder.build(
@@ -59,7 +60,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
             uniformsPanel = new MyPanel.Builder(300, 600).setPlugin(
                     new RenderableHandlerPlugin()
-                            .addBelow(new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"))
+                            .addBelow(new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
                                     .setSlices(32) // TODO: make a static final for this border as its used in multiple places
                                     .setThickness(8)
                                     .setPadding(-8).setRenderInside(true)
@@ -103,7 +104,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
                 .build();
 
         new DialougeButtonPanel.Builder(720, 640, panelOpeningButton).withCharlie().build(UIElements)
-                .addToInternalData(pair("ship", ship))
+                .addToInternalData(pair("ship", ship)).showCloseButton(false)
                 .setOnUIOpen(MainRefitPanelPlugin::onUIOpen);
     }
 
@@ -123,6 +124,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
     @Override
     public void processInput(List<InputEventAPI> events) {
         // need to recreate as the game destroys mouse inputs for stuff like buttons after consuming them
+        InputEventAPICreator.discoverEventClass(events);
         List<InputEventAPI> zaza = InputEventAPICreator.createImmediateEvents();
         for (UIElement<?, ?> element : ActiveUIElements) {
             element.processInput(zaza);

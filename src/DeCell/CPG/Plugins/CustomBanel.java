@@ -31,9 +31,10 @@ public class CustomBanel implements EveryFrameScript {
         UIPanelAPI refitTab = (UIPanelAPI) getCurrentTab();
         U refitPanel = getRefitPanel();
         Ship ship = refitPanel.getShipDisplay().getShip();
-        boolean isPhaseShip = ship.getHullSpec().isPhase();
+        boolean isPhaseShip = ship.getHullSpec().isPhase(); // it is FPG because the mod was named FPG and not CPG before
+        boolean hasHullmod = ship.getVariant().hasHullMod("FPG_NoPhaseGlow");
         String tmpShipID = ship.getId();
-        if (!isPhaseShip || !Objects.equals(tmpShipID, shipID)) {
+        if ((!isPhaseShip || !hasHullmod) || !Objects.equals(tmpShipID, shipID)) {
             if (customPanel != null)
                 refitTab.removeComponent(customPanel.u);
             customPanel = null;

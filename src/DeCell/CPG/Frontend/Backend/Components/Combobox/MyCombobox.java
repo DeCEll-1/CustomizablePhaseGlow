@@ -52,7 +52,7 @@ public class MyCombobox extends UIContainer<MyCombobox, UIComponentAPI> {
 
     private void openList() {
         listOpen = true;
-        float w = Math.max(elements.stream().mapToInt(s -> s.text.length() * 16).max().orElse((int) button.w()), parent.w());
+        float w = Math.max(elements.stream().mapToInt(s -> s.text.length() * 7).max().orElse((int) button.w()), parent.w());
         float h = elements.size() * 26;
 
         container = new MyPanel.Builder(w, h)

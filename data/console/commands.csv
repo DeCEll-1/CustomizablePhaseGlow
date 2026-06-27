@@ -1,5 +1,5 @@
 command,class,tags,syntax,help
-FPG_RefreshShaders,DeCell.CPG.Console.RefreshShaders,debug,debug,reloads FPG shaders
+CPG_RefreshShaders,DeCell.CPG.Console.RefreshShaders,debug,debug,reloads CPG shaders
 ,,,,
 ,,,,
 ,,,,

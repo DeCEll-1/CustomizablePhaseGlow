@@ -1,2 +1,2 @@
 name,id,tier,rarity,tech/manufacturer,tags,uiTags,base value,unlocked,hidden,hiddenEverywhere,cost_frigate,cost_dest,cost_cruiser,cost_capital,script,desc,short,sprite
-NoPhaseGlow,FPG_NoPhaseGlow,,,_,,,0,,FALSE,,0,0,0,0,DeCell.CPG.Hullmods.NoPhaseGlow,NoPhaseGlow,NoPhaseGlow,icon.png
+Custom Phase Glow,FPG_NoPhaseGlow,,Customizable Phase Glow,Customizable Phase Glow,,,0,TRUE,FALSE,,0,0,0,0,DeCell.CPG.Hullmods.NoPhaseGlow,NoPhaseGlow,NoPhaseGlow,icon.png

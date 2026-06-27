@@ -144,6 +144,9 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
     public NumericUpDown setMinMax(double min, double max) {
         this.minValue = min;
         this.maxValue = max;
+        int maxChars = Math.max(Double.toString(this.maxValue).length(), Double.toString(this.minValue).length());
+        this.tb.setMaxChars(maxChars);
+        this.tb.setLimitByStringWidth(false);
         return this;
     }
     //#endregion

@@ -67,7 +67,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
                         .add(new RenderableHandlerPlugin()
                                 .addBelow(
                                         // TODO: make these more modifyable
-                                        new BorderRenderable(Global.getSettings().getSprite("fpg", "border2"))
+                                        new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
                                                 .setSlices(32)
                                                 .setThickness(16)
                                                 .setPadding(-16).setRenderInside(true))

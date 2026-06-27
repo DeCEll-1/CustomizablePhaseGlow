@@ -2,6 +2,7 @@ package DeCell.CPG.Hullmods;
 
 import DeCell.CPG.CustomizablePhaseGlow;
 import DeCell.CPG.JavaSlop.ShaderJsonParsing.ShaderJsonModel;
+import DeCell.CPG.Misc;
 import DeCell.CPG.Reflection.Reflections;
 import DeCell.CPG.Shader;
 import com.fs.graphics.Sprite;
@@ -69,24 +70,24 @@ public class NoPhaseGlow extends BaseHullMod {
                     return;
 
                 // TODO: use unobfuscated names
-                this.texture.Ø00000(); // bind texture
+                Reflections.bindTexture(this.getTexture());
+//                this.texture.Ø00000(); // bind texture
                 ShaderJsonModel shaderData = CustomizablePhaseGlow.getShaderForShip(ship);
 
                 if (shaderData != null && shaderData.getShader() != null) {
                     Shader shader = shaderData.getShader();
                     shader.bind();
 
-
                     shaderData.updateUniformValues(ship, this);
 
-                    int texID = this.getTexture().ö00000();
+                    // TODO: figure out *some* way to fix this lambda variable bs that java haves
                     float t = ship.getFullTimeDeployed();
                 }
 
 
                 boolean useClamp = true;
                 if (useClamp) {
-                    B.Ø00000(); // enable clamp
+                    Misc.enableClamp(); // enable clamp
                 }
 
                 GL11.glPushMatrix();
@@ -98,12 +99,13 @@ public class NoPhaseGlow extends BaseHullMod {
 //                        (byte) ((int) ((float) this.color.getAlpha() * this.getAlphaMult()))
 //                );
 
+                Number alpha = (Number) CustomizablePhaseGlow.getShipProperty(ship, ShaderJsonModel.phaseAlphaMultKeyword);
                 GL11.glColor4ub(
                         (byte) 0xFF,
                         (byte) 0xFF,
                         (byte) 0xFF,
                         (byte) ((int) ((float) this.color.getAlpha() * this.getAlphaMult() *
-                                ((Number) CustomizablePhaseGlow.getShipProperty(ship, ShaderJsonModel.phaseAlphaMultKeyword)).floatValue()
+                                ((alpha != null) ? alpha.floatValue() : 1f)
                         ))
                 );
 
@@ -149,7 +151,7 @@ public class NoPhaseGlow extends BaseHullMod {
                 GL11.glPopMatrix();
 
                 if (useClamp) {
-                    B.Ò00000(); // disable clamp
+                    Misc.disableClamp(); // disable clamp
                 }
                 if (shaderData != null && shaderData.getShader() != null) {
                     shaderData.getShader().unbind();
@@ -176,6 +178,7 @@ public class NoPhaseGlow extends BaseHullMod {
 
 
         Sprite customHighlightSprite = getOverridenSpriteForTexture(getGlow2SpritePath(ship), ship);
+//        customHighlightSprite.setTexture(null);
         tmp = (Sprite) highlightSpriteHandle.get(((Ship) ship).getPhaseCloak());
 
         customHighlightSprite.setCenter(tmp.getCenterX(), tmp.getCenterY());
@@ -183,9 +186,13 @@ public class NoPhaseGlow extends BaseHullMod {
         highlightSpriteHandle.set(((Ship) ship).getPhaseCloak(), customHighlightSprite);
     }
 
+    @Override
+    public boolean isApplicableToShip(ShipAPI ship) {
+        return ship.getHullSpec().isPhase();
+    }
+
     private static VarHandle diffuseSpriteHandle;
     private static VarHandle highlightSpriteHandle;
-
 
     private void UpdateSpriteHandles(ShipAPI ship) {
         try {

@@ -1,14 +1,14 @@
 {
-    "fpg_debug": true,
-    "fpg_debug_ui": false,
-    "fpg_debug_ui_highlight_charlie": false,
+    "cpg_debug": true,
+    "cpg_debug_ui": false,
+    "cpg_debug_ui_highlight_charlie": false,
     "plugins": {
-        "refit_screen_thingamajig" : "DeCell.FPG.Plugins.CustomBanel"
+        "refit_screen_thingamajig" : "DeCell.CPG.Plugins.CustomBanel"
     },
     "graphics":{
-        "fpg":{
-            "border1": "graphics/FPG/ui/Border.png",
-            "border2": "graphics/FPG/ui/Border2.png",
+        "cpg":{
+            "border1": "graphics/CPG/ui/Border.png",
+            "border2": "graphics/CPG/ui/Border2.png",
         }
     }
 }
