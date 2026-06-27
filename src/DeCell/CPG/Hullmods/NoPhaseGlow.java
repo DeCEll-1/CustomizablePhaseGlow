@@ -69,7 +69,6 @@ public class NoPhaseGlow extends BaseHullMod {
                 if (this.texture == null)
                     return;
 
-                // TODO: use unobfuscated names
                 Reflections.bindTexture(this.getTexture());
 //                this.texture.Ø00000(); // bind texture
                 ShaderJsonModel shaderData = CustomizablePhaseGlow.getShaderForShip(ship);
