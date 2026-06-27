@@ -3,7 +3,7 @@ name: Generate TODO.md
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - 'TODO.md'
 
