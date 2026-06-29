@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 // i would global static these if java had that feature
 
 public class CustomizablePhaseGlow {
+    // TODO: allow like 20% for the enemy ships to have the fancy glows with random colors
     public static boolean Debug = false;
     public static boolean DebugUI = false;
     public static boolean DebugUIHighlightCharlie = false;
