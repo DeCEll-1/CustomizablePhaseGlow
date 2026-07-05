@@ -97,12 +97,7 @@ public class ShaderUniformModel {
 
     public MyPanel createUniformModal(MyPanel parent, Ship ship) {
         MyPanel container = new MyPanel.Builder(280, 80).setPlugin(
-                new RenderableHandlerPlugin().addBelow(
-                        new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
-                                .setSlices(32)
-                                .setThickness(8)
-                                .setPadding(-8).setRenderInside(true)
-                )
+                new RenderableHandlerPlugin().addBelow(BorderRenderable.createBorder2())
         ).build(parent);
 
 

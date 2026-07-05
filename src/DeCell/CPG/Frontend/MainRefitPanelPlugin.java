@@ -60,11 +60,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
             uniformsPanel = new MyPanel.Builder(300, 600).setPlugin(
                     new RenderableHandlerPlugin()
-                            .addBelow(new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
-                                    .setSlices(32) // TODO: make a static final for this border as its used in multiple places
-                                    .setThickness(8)
-                                    .setPadding(-8).setRenderInside(true)
-                            )
+                            .addBelow(BorderRenderable.createBorder2())
             ).build(_parent).inRMid(20);
             c.addToInternalData("uniformsPanel", uniformsPanel);
 

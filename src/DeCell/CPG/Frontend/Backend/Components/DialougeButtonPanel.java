@@ -10,7 +10,6 @@ import DeCell.CPG.Frontend.Backend.Plugins.MultiPluginHandler;
 import DeCell.CPG.Frontend.Backend.Renderable.BorderRenderable;
 import DeCell.CPG.Frontend.Backend.Renderable.RenderableHandlerPlugin;
 import DeCell.CPG.JavaSlop.TriConsumer;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -65,13 +64,7 @@ public class DialougeButtonPanel extends UIContainer<DialougeButtonPanel, Custom
         this.container = new MyPanel.Builder(this.w(), this.h())
                 .setPlugin(new MultiPluginHandler() // main window
                         .add(new RenderableHandlerPlugin()
-                                .addBelow(
-                                        // TODO: make these more modifyable
-                                        new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
-                                                .setSlices(32)
-                                                .setThickness(16)
-                                                .setPadding(-16).setRenderInside(true))
-                        ).add(new LambdaUIPanelPlugin()
+                                .addBelow(BorderRenderable.createBorder2())).add(new LambdaUIPanelPlugin()
                                 .onProcessInput(events -> {
                                             for (InputEventAPI e : events) {
                                                 if (e.isKeyDownEvent() && e.getEventValue() == Keyboard.KEY_ESCAPE) {

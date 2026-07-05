@@ -78,7 +78,7 @@ public class NoPhaseGlow extends BaseHullMod {
                     shader.bind();
 
                     shaderData.updateUniformValues(ship, this);
-                    
+
                     float t = ship.getFullTimeDeployed();
                 }
 

@@ -3,6 +3,7 @@ package DeCell.CPG.Frontend.Backend.Renderable;
 import DeCell.CPG.Frontend.Backend.Rect;
 import DeCell.CPG.Frontend.Backend.UIContainer;
 import DeCell.CPG.Frontend.Backend.UIElement;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 
@@ -20,6 +21,7 @@ public class BorderRenderable extends PluginRenderable {
 
     private float padding = 0;
     private boolean renderInside = false;
+    private SpriteAPI renderInsideTexture;
 
     public BorderRenderable(SpriteAPI borderSprite) {
         this.borderSprite = borderSprite;
@@ -98,8 +100,9 @@ public class BorderRenderable extends PluginRenderable {
         float borderLeftTextureBorder = leftSlice / texW;
 
 
+        // TODO: cache these
         // Top Left
-        new Rect(x + padding, y + h - topThickness - padding, leftThickness, topThickness) // TODO: cache these
+        new Rect(x + padding, y + h - topThickness - padding, leftThickness, topThickness)
                 .render(new Rect(0, borderTopTextureBorder, borderLeftTextureBorder, texT));
 
         // Top Right
@@ -130,12 +133,31 @@ public class BorderRenderable extends PluginRenderable {
         new Rect(x + w - rightThickness - padding, y + bottomThickness + padding, rightThickness, h - topThickness - bottomThickness - (2 * padding))
                 .render(new Rect(borderRightTextureBorder, borderBottomTextureBorder, texS, borderTopTextureBorder));
 
-        if (renderInside) // TODO: make this a seperate texture as it scales like a bitch with this setup
+        if (renderInsideTexture != null && renderInside) {
+            renderInsideTexture.bindTexture();
+
+            // 1. Calculate the final width and height of the inside destination area
+            float destW = w - leftThickness - rightThickness - (2 * padding);
+            float destH = h - topThickness - bottomThickness - (2 * padding);
+
+            // 2. Get the actual dimensions of your standalone inside texture
+            // (Replace these method names with whatever your texture class uses, e.g., getWidth())
+            float textureWidth = renderInsideTexture.getWidth();
+            float textureHeight = renderInsideTexture.getHeight();
+
+            // 3. Divide destination size by texture size to get the wrap factor
+            float maxU = destW / textureWidth;
+            float maxV = destH / textureHeight;
+
+            // 4. Render with 0 to maxU/maxV to force the tiling
+            new Rect(x + leftThickness + padding, y + bottomThickness + padding, destW, destH)
+                    .render(new Rect(0, 0, maxU, maxV));
+        } else if (renderInside)
             new Rect(x + leftThickness + padding, y + bottomThickness + padding, w - leftThickness - rightThickness - (2 * padding), h - topThickness - bottomThickness - (2 * padding))
                     .render(new Rect(borderLeftTextureBorder, borderBottomTextureBorder, borderRightTextureBorder, borderTopTextureBorder));
 
 //        GL11.glColor4f(1f, 1f, 1f, 1f);
-//        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+//        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); // wont be a problem as no one should *expect* a specific texture
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
     }
@@ -148,5 +170,18 @@ public class BorderRenderable extends PluginRenderable {
     public BorderRenderable setRenderInside(boolean s) {
         this.renderInside = s;
         return this;
+    }
+
+    public BorderRenderable setRenderInsideTexture(SpriteAPI tex) {
+        this.renderInsideTexture = tex;
+        return this;
+    }
+
+    public static BorderRenderable createBorder2() {
+        return new BorderRenderable(Global.getSettings().getSprite("cpg", "border2"))
+                .setSlices(32)
+                .setRenderInsideTexture(Global.getSettings().getSprite("cpg", "border2Inside"))
+                .setThickness(16)
+                .setPadding(-16).setRenderInside(true);
     }
 }

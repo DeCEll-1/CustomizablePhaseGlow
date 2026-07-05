@@ -9,6 +9,7 @@
         "cpg":{
             "border1": "graphics/CPG/ui/Border.png",
             "border2": "graphics/CPG/ui/Border2.png",
+            "border2Inside": "graphics/CPG/ui/Border2InsideTexture.png",
         }
     }
 }
