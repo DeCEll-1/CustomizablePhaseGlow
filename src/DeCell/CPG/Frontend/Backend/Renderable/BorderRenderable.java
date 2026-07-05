@@ -11,7 +11,15 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class BorderRenderable extends PluginRenderable {
 
-    private SpriteAPI borderSprite;     // The border texture (9-patch style recommended)
+    private SpriteAPI borderSprite;
+    private Rect cacheDstTopLeft, cacheDstTopRight, cacheDstBottomLeft, cacheDstBottomRight;
+    private Rect cacheDstTopEdge, cacheDstBottomEdge, cacheDstLeftEdge, cacheDstRightEdge;
+    private Rect cacheDstInside;
+
+    private Rect cacheSrcTopLeft, cacheSrcTopRight, cacheSrcBottomLeft, cacheSrcBottomRight;
+    private Rect cacheSrcTopEdge, cacheSrcBottomEdge, cacheSrcLeftEdge, cacheSrcRightEdge;
+    private Rect cacheSrcInsideBorder;
+    private boolean needsLayoutUpdate = true;
 
     // the texture thickness widths
     private float leftSlice, rightSlice, topSlice, bottomSlice;
@@ -61,6 +69,25 @@ public class BorderRenderable extends PluginRenderable {
         return this;
     }
 
+    public BorderRenderable setRenderInside(boolean s) {
+        this.renderInside = s;
+        return this;
+    }
+
+    public BorderRenderable setRenderInsideTexture(SpriteAPI tex) {
+        this.renderInsideTexture = tex;
+        return this;
+    }
+
+    public BorderRenderable setPadding(float s) {
+        this.padding = s;
+        return this;
+    }
+
+    public void invalidateLayout() {
+        this.needsLayoutUpdate = true;
+    }
+
     @Override
     public void init(UIContainer<? extends UIElement<?, CustomPanelAPI>, CustomPanelAPI> parent) {
         super.init(parent);
@@ -75,106 +102,86 @@ public class BorderRenderable extends PluginRenderable {
     public void renderBelow(float alpha) {
         if (zone == null || borderSprite == null) return;
 
-        float x = zone.x;
-        float y = zone.y;
-        float w = zone.w;
-        float h = zone.h;
+        if (needsLayoutUpdate) {
+            updateCachedRects();
+        }
 
-        // ignore the ai slop comments it shet the bed like 40 times ill clean them up eventually
         glEnable(GL_TEXTURE_2D);
         borderSprite.bindTexture();
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//        borderSprite.setAlphaMult(alpha);
+        cacheDstTopLeft.render(cacheSrcTopLeft);
+        cacheDstTopRight.render(cacheSrcTopRight);
+        cacheDstBottomLeft.render(cacheSrcBottomLeft);
+        cacheDstBottomRight.render(cacheSrcBottomRight);
 
+        cacheDstTopEdge.render(cacheSrcTopEdge);
+        cacheDstBottomEdge.render(cacheSrcBottomEdge);
+        cacheDstLeftEdge.render(cacheSrcLeftEdge);
+        cacheDstRightEdge.render(cacheSrcRightEdge);
 
-        float texS = borderSprite.getTextureWidth(); // in decimal
-        float texT = borderSprite.getTextureHeight(); // in decimal
-        float texW = borderSprite.getWidth() / texT; // raw pixel width
-        float texH = borderSprite.getHeight() / texT; // raw pixel height
+        if (renderInside) {
+            if (renderInsideTexture != null) {
+                renderInsideTexture.bindTexture();
+
+                float maxU = cacheDstInside.w / renderInsideTexture.getWidth();
+                float maxV = cacheDstInside.h / renderInsideTexture.getHeight();
+
+                cacheDstInside.render(new Rect(0, 0, maxU, maxV));
+            } else {
+                cacheDstInside.render(cacheSrcInsideBorder);
+            }
+        }
+
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+    }
+
+    private void updateCachedRects() {
+        if (zone == null || borderSprite == null) return;
+
+        float x = zone.x;
+        float y = zone.y;
+        float w = zone.w;
+        float h = zone.h;
+
+        float texS = borderSprite.getTextureWidth();
+        float texT = borderSprite.getTextureHeight();
+        float texW = borderSprite.getWidth() / texT;
+        float texH = borderSprite.getHeight() / texT;
 
         float borderTopTextureBorder = texT - (topSlice / texH);
         float borderRightTextureBorder = texS - (rightSlice / texW);
         float borderBottomTextureBorder = bottomSlice / texH;
         float borderLeftTextureBorder = leftSlice / texW;
 
+        cacheDstTopLeft = new Rect(x + padding, y + h - topThickness - padding, leftThickness, topThickness);
+        cacheDstTopRight = new Rect(x + w - rightThickness - padding, y + h - topThickness - padding, rightThickness, topThickness);
+        cacheDstBottomLeft = new Rect(x + padding, y + padding, leftThickness, bottomThickness);
+        cacheDstBottomRight = new Rect(x + w - rightThickness - padding, y + padding, rightThickness, bottomThickness);
 
-        // TODO: cache these
-        // Top Left
-        new Rect(x + padding, y + h - topThickness - padding, leftThickness, topThickness)
-                .render(new Rect(0, borderTopTextureBorder, borderLeftTextureBorder, texT));
+        float edgeW = w - leftThickness - rightThickness - (2 * padding);
+        float edgeH = h - topThickness - bottomThickness - (2 * padding);
 
-        // Top Right
-        new Rect(x + w - rightThickness - padding, y + h - topThickness - padding, rightThickness, topThickness)
-                .render(new Rect(borderRightTextureBorder, borderTopTextureBorder, texS, texT));
+        cacheDstTopEdge = new Rect(x + leftThickness + padding, y + h - topThickness - padding, edgeW, topThickness);
+        cacheDstBottomEdge = new Rect(x + leftThickness + padding, y + padding, edgeW, bottomThickness);
+        cacheDstLeftEdge = new Rect(x + padding, y + bottomThickness + padding, leftThickness, edgeH);
+        cacheDstRightEdge = new Rect(x + w - rightThickness - padding, y + bottomThickness + padding, rightThickness, edgeH);
+        cacheDstInside = new Rect(x + leftThickness + padding, y + bottomThickness + padding, edgeW, edgeH);
 
-        // Bottom Left
-        new Rect(x + padding, y + padding, leftThickness, bottomThickness)
-                .render(new Rect(0, 0, borderLeftTextureBorder, borderBottomTextureBorder));
+        cacheSrcTopLeft = new Rect(0, borderTopTextureBorder, borderLeftTextureBorder, texT);
+        cacheSrcTopRight = new Rect(borderRightTextureBorder, borderTopTextureBorder, texS, texT);
+        cacheSrcBottomLeft = new Rect(0, 0, borderLeftTextureBorder, borderBottomTextureBorder);
+        cacheSrcBottomRight = new Rect(borderRightTextureBorder, 0, texS, borderBottomTextureBorder);
 
-        // Bottom Right
-        new Rect(x + w - rightThickness - padding, y + padding, rightThickness, bottomThickness)
-                .render(new Rect(borderRightTextureBorder, 0, texS, borderBottomTextureBorder));
+        cacheSrcTopEdge = new Rect(borderLeftTextureBorder, borderTopTextureBorder, borderRightTextureBorder, texT);
+        cacheSrcBottomEdge = new Rect(borderLeftTextureBorder, 0, borderRightTextureBorder, borderBottomTextureBorder);
+        cacheSrcLeftEdge = new Rect(0, borderBottomTextureBorder, borderLeftTextureBorder, borderTopTextureBorder);
+        cacheSrcRightEdge = new Rect(borderRightTextureBorder, borderBottomTextureBorder, texS, borderTopTextureBorder);
+        cacheSrcInsideBorder = new Rect(borderLeftTextureBorder, borderBottomTextureBorder, borderRightTextureBorder, borderTopTextureBorder);
 
-        // Top Edge
-        new Rect(x + leftThickness + padding, y + h - topThickness - padding, w - leftThickness - rightThickness - (2 * padding), topThickness)
-                .render(new Rect(borderLeftTextureBorder, borderTopTextureBorder, borderRightTextureBorder, texT));
-
-        // Bottom Edge
-        new Rect(x + leftThickness + padding, y + padding, w - leftThickness - rightThickness - (2 * padding), bottomThickness)
-                .render(new Rect(borderLeftTextureBorder, 0, borderRightTextureBorder, borderBottomTextureBorder));
-
-        // Left Edge
-        new Rect(x + padding, y + bottomThickness + padding, leftThickness, h - topThickness - bottomThickness - (2 * padding))
-                .render(new Rect(0, borderBottomTextureBorder, borderLeftTextureBorder, borderTopTextureBorder));
-
-        // Right Edge
-        new Rect(x + w - rightThickness - padding, y + bottomThickness + padding, rightThickness, h - topThickness - bottomThickness - (2 * padding))
-                .render(new Rect(borderRightTextureBorder, borderBottomTextureBorder, texS, borderTopTextureBorder));
-
-        if (renderInsideTexture != null && renderInside) {
-            renderInsideTexture.bindTexture();
-
-            // 1. Calculate the final width and height of the inside destination area
-            float destW = w - leftThickness - rightThickness - (2 * padding);
-            float destH = h - topThickness - bottomThickness - (2 * padding);
-
-            // 2. Get the actual dimensions of your standalone inside texture
-            // (Replace these method names with whatever your texture class uses, e.g., getWidth())
-            float textureWidth = renderInsideTexture.getWidth();
-            float textureHeight = renderInsideTexture.getHeight();
-
-            // 3. Divide destination size by texture size to get the wrap factor
-            float maxU = destW / textureWidth;
-            float maxV = destH / textureHeight;
-
-            // 4. Render with 0 to maxU/maxV to force the tiling
-            new Rect(x + leftThickness + padding, y + bottomThickness + padding, destW, destH)
-                    .render(new Rect(0, 0, maxU, maxV));
-        } else if (renderInside)
-            new Rect(x + leftThickness + padding, y + bottomThickness + padding, w - leftThickness - rightThickness - (2 * padding), h - topThickness - bottomThickness - (2 * padding))
-                    .render(new Rect(borderLeftTextureBorder, borderBottomTextureBorder, borderRightTextureBorder, borderTopTextureBorder));
-
-//        GL11.glColor4f(1f, 1f, 1f, 1f);
-//        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); // wont be a problem as no one should *expect* a specific texture
-        glDisable(GL_BLEND);
-        glDisable(GL_TEXTURE_2D);
-    }
-
-    public BorderRenderable setPadding(float s) {
-        this.padding = s;
-        return this;
-    }
-
-    public BorderRenderable setRenderInside(boolean s) {
-        this.renderInside = s;
-        return this;
-    }
-
-    public BorderRenderable setRenderInsideTexture(SpriteAPI tex) {
-        this.renderInsideTexture = tex;
-        return this;
+        needsLayoutUpdate = false;
     }
 
     public static BorderRenderable createBorder2() {
