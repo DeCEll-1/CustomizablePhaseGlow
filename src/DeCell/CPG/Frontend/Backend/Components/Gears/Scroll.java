@@ -1,6 +1,7 @@
 package DeCell.CPG.Frontend.Backend.Components.Gears;
 
 import DeCell.CPG.Frontend.Backend.UIElement;
+import com.fs.starfarer.api.input.InputEventAPI;
 import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
@@ -23,39 +24,38 @@ public class Scroll {
         }
     }
 
-    // TODO: make these use the new event system
-    public void onHover(UIElement<?, ?> el) {
-        if (!el.rect().containsMouse())
+    public void onHover(UIElement<?, ?> el, List<InputEventAPI> events) {
+        if (!el.rect().containsMouse()) {
             return;
-
-        int wheelDelta = Mouse.getEventDWheel();
-        if (wheelDelta == 0)
-            return;
-
-        long currentEventNanos = Mouse.getEventNanoseconds();
-        if (currentEventNanos == lastScrollEventNanos)
-            return;
-        lastScrollEventNanos = currentEventNanos;
-
-        long currentTimeMs = System.currentTimeMillis();
-        long timeSinceLastScroll = currentTimeMs - lastScrollTimeMs;
-        lastScrollTimeMs = currentTimeMs;
-
-        float currentScrollDelta = scrollDelta;
-
-        if (timeSinceLastScroll < accelerationThresholdMS && timeSinceLastScroll > 0) {
-            float speedFactor = (float) accelerationThresholdMS / timeSinceLastScroll;
-
-            float multiplier = Math.min(speedFactor, maxAccelerationMultiplier);
-
-            currentScrollDelta *= multiplier;
         }
 
-        if (wheelDelta < 0)
-            currentScrollDelta = -currentScrollDelta;
+        for (InputEventAPI event : events) {
+            if (event.isConsumed() || !event.isMouseScrollEvent())
+                continue;
 
-        for (Consumer<Float> listener : listeners) {
-            listener.accept(currentScrollDelta);
+            int wheelDelta = event.getEventValue();
+            if (wheelDelta == 0)
+                continue;
+
+            event.consume();
+
+            long currentTimeMs = System.currentTimeMillis();
+            long timeSinceLastScroll = currentTimeMs - lastScrollTimeMs;
+            lastScrollTimeMs = currentTimeMs;
+
+            float currentScrollDelta = scrollDelta;
+
+            if (timeSinceLastScroll < accelerationThresholdMS && timeSinceLastScroll > 0) {
+                float speedFactor = (float) accelerationThresholdMS / timeSinceLastScroll;
+                float multiplier = Math.min(speedFactor, maxAccelerationMultiplier);
+                currentScrollDelta *= multiplier;
+            }
+
+            if (wheelDelta < 0)
+                currentScrollDelta = -currentScrollDelta;
+
+            for (Consumer<Float> listener : listeners)
+                listener.accept(currentScrollDelta);
         }
     }
 

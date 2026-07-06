@@ -109,7 +109,7 @@ public class NumericUpDown extends UIContainer<NumericUpDown, UIComponentAPI> {
             return;
         }
 
-        upDownArrowGear.advance();
+        upDownArrowGear.advance(events);
     }
 
     private void handleArrowKeys(boolean upPressed) {
