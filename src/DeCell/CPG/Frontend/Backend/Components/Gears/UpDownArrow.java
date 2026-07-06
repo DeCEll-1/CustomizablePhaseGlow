@@ -4,6 +4,7 @@ import DeCell.CPG.Helpers.ElapsingInterval;
 import DeCell.CPG.Misc;
 import Kryz.Tweening.EasingFunctions;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.input.InputEventAPI;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
@@ -33,33 +34,56 @@ public class UpDownArrow {
         }
     }
 
-    // TODO: make these use the new event system
-    public void advance() {
-        boolean upPressed = Keyboard.isKeyDown(Keyboard.KEY_UP);
-        boolean downPressed = Keyboard.isKeyDown(Keyboard.KEY_DOWN);
-        if (upPressed || downPressed) {
-            float deltaTime = Global.getCombatEngine().getElapsedInLastFrame();
+    public void advance(List<InputEventAPI> events) {
+        float deltaTime = Global.getCombatEngine().getElapsedInLastFrame();
+        boolean hasPressedActiveKey = false;
+        boolean upPressed = false;
 
-            if (holdTime == 0)
-                handleArrowKeys(upPressed);
+        for (InputEventAPI event : events) {
+            if (event.isConsumed() || !event.isKeyboardEvent()) {
+                continue;
+            }
+
+            int keyCode = event.getEventValue();
+            boolean isUpKey = (keyCode == Keyboard.KEY_UP);
+            boolean isDownKey = (keyCode == Keyboard.KEY_DOWN);
+
+            if (isUpKey || isDownKey) {
+                if (event.isKeyDownEvent()) {
+                    handleArrowKeys(isUpKey);
+                    holdTime = 0f;
+                    keyPressInterval.setElapsed(0f);
+                    event.consume();
+                }
+
+                hasPressedActiveKey = true;
+                if (isUpKey) upPressed = true;
+            }
+        }
+
+        if (!hasPressedActiveKey) {
+            upPressed = Keyboard.isKeyDown(Keyboard.KEY_UP);
+            boolean downPressed = Keyboard.isKeyDown(Keyboard.KEY_DOWN);
+            hasPressedActiveKey = upPressed || downPressed;
+        }
+
+        if (hasPressedActiveKey) {
             holdTime += deltaTime;
 
-            if (holdTime < initialDelay)
-                return;
+            if (holdTime >= initialDelay) {
+                keyPressInterval.advance(deltaTime);
 
+                float dynamicInterval = intervalMax - Misc.clamp(EasingFunctions.Linear(holdTime * 0.1f), 0, intervalMax - 0.05f);
+                keyPressInterval.setInterval(intervalMin, dynamicInterval);
 
-            keyPressInterval.advance(deltaTime);
-
-            keyPressInterval.setInterval(intervalMin,
-                    intervalMax - Misc.clamp(EasingFunctions.Linear(holdTime * 0.1f), 0, intervalMax - 0.05f));
-
-            if (keyPressInterval.isElapsed()) {
-                handleArrowKeys(upPressed);
+                if (keyPressInterval.isElapsed()) {
+                    handleArrowKeys(upPressed);
+                }
             }
         } else {
             keyPressInterval.setInterval(intervalMin, intervalMax);
-            keyPressInterval.setElapsed(0);
-            holdTime = 0;
+            keyPressInterval.setElapsed(0f);
+            holdTime = 0f;
         }
     }
 
@@ -67,7 +91,6 @@ public class UpDownArrow {
         for (Consumer<ButtonType> listener : listeners) {
             listener.accept(upPressed ? ButtonType.UP : ButtonType.DOWN);
         }
-
     }
 
 
