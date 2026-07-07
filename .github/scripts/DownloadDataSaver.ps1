@@ -21,17 +21,15 @@ try {
 # Capture current normalized timestamp for this data logging event
 $SnapshotDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
-# 2. Extract current total download metrics
-$CurrentMetrics = foreach ($Release in $Releases) {
-    $TotalDownloads = ($Release.assets | Measure-Object -Property download_count -Sum).Sum
-    if ($null -eq $TotalDownloads) { $TotalDownloads = 0 }
+# 2. Extract current total download metrics (Sum of ALL releases combined)
+$AllAssets = $Releases.assets
+$TotalRepoDownloads = ($AllAssets | Measure-Object -Property download_count -Sum).Sum
+if ($null -eq $TotalRepoDownloads) { $TotalRepoDownloads = 0 }
 
-    [PSCustomObject]@{
-        SnapshotDate   = $SnapshotDate
-        ReleaseTag     = $Release.tag_name
-        PublishedAt    = $Release.published_at
-        TotalDownloads = [int]$TotalDownloads
-    }
+# Create a single object for the entire repository snapshot
+$CurrentMetrics = [PSCustomObject]@{
+    SnapshotDate   = $SnapshotDate
+    TotalDownloads = [int]$TotalRepoDownloads
 }
 
 # 3. Setup output file paths
