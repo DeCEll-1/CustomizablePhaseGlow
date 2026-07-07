@@ -37,20 +37,8 @@
   },
   {
     "SnapshotDate": "2026-07-06T04:09:02Z",
-    "ReleaseTag": "1.0.2",
-    "PublishedAt": "2026-07-05T15:35:48Z",
-    "TotalDownloads": 2
-  },
-  {
-    "SnapshotDate": "2026-07-06T04:09:02Z",
-    "ReleaseTag": "1.0.1",
-    "PublishedAt": "2026-07-05T15:25:05Z",
-    "TotalDownloads": 0
-  },
-  {
-    "SnapshotDate": "2026-07-06T04:09:02Z",
-    "ReleaseTag": "1.0.0",
-    "PublishedAt": "2026-06-27T22:42:53Z",
-    "TotalDownloads": 83
+    "ReleaseTag": "1.0.3",
+    "PublishedAt": "2026-07-06T18:12:58Z",
+    "TotalDownloads": 85
   }
 ]
