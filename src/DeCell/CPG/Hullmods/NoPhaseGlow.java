@@ -35,12 +35,13 @@ public class NoPhaseGlow extends BaseHullMod {
     }
 
     private static String getCompleteFilePathOfShipOverlay(ShipAPI ship, String appendance) {
+        String match = "";
         try {
             String filePathRegex = "^.*(data.*$)";
             String shipFilePath = ship.getHullSpec().getShipFilePath().replace('\\', '/');
             Matcher matcher = Pattern.compile(filePathRegex).matcher(shipFilePath);
             matcher.find();
-            String match = matcher.group(1);
+            match = matcher.group(1);
 
             String spritePath = new JSONObject(Global.getSettings().loadText(match)).getString("spriteName");
 
@@ -50,7 +51,12 @@ public class NoPhaseGlow extends BaseHullMod {
             String match2 = matcher2.group(1) + appendance + matcher2.group(2);
             return match2;
         } catch (JSONException | IOException e) { // oh my god i fucking hate javas shitty ass try catch bs
-            throw new RuntimeException(e);
+            throw new RuntimeException("extra info: \n" +
+                    "ship.getHullSpec().getHullId(): " + ship.getHullSpec().getHullId() +
+                    "\nship.getHullSpec().getShipFilePath(): " + ship.getHullSpec().getShipFilePath() +
+                    "\nappendance: " + appendance +
+                    "\nmatch: " + match +
+                    "\nstack trace: " + e);
         }
     }
 
