@@ -1,1 +1,0 @@
-overriding a phase ships glow textures for testing purposes

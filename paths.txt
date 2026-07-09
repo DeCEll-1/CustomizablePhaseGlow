@@ -1,9 +1,8 @@
 data
 graphics
 jars
-src
 CPG.version
-icon.png
+icon.jpg
 LICENSE
 mod_info.json
 README.md
