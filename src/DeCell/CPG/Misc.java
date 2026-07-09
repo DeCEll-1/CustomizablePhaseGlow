@@ -1,6 +1,7 @@
 package DeCell.CPG;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.combat.ShipAPI;
 import org.lwjgl.opengl.GL11;
 
 
@@ -129,8 +130,12 @@ public class Misc {
         GL11.glTexParameteri(3553, 10243, 10497);
     }
 
-    public static void textureWrapRepeat(){
+    public static void textureWrapRepeat() {
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+    }
+
+    public static boolean isSkin(ShipAPI ship) {
+        return ship.getHullSpec().getRestoredToHullId().equals(ship.getHullSpec().getBaseHullId());
     }
 }

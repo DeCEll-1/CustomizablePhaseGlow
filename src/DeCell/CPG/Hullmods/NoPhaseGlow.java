@@ -35,29 +35,14 @@ public class NoPhaseGlow extends BaseHullMod {
     }
 
     private static String getCompleteFilePathOfShipOverlay(ShipAPI ship, String appendance) {
-        String match = "";
-        try {
-            String filePathRegex = "^.*(data.*$)";
-            String shipFilePath = ship.getHullSpec().getShipFilePath().replace('\\', '/');
-            Matcher matcher = Pattern.compile(filePathRegex).matcher(shipFilePath);
-            matcher.find();
-            match = matcher.group(1);
+        String spriteName = ship.getHullSpec().getSpriteName();
 
-            String spritePath = new JSONObject(Global.getSettings().loadText(match)).getString("spriteName");
+        int lastDot = spriteName.lastIndexOf('.');
 
-            String extensionRegex = "(^.*)(\\..*$)";
-            Matcher matcher2 = Pattern.compile(extensionRegex).matcher(spritePath);
-            matcher2.find();
-            String match2 = matcher2.group(1) + appendance + matcher2.group(2);
-            return match2;
-        } catch (JSONException | IOException e) { // oh my god i fucking hate javas shitty ass try catch bs
-            throw new RuntimeException("extra info: \n" +
-                    "ship.getHullSpec().getHullId(): " + ship.getHullSpec().getHullId() +
-                    "\nship.getHullSpec().getShipFilePath(): " + ship.getHullSpec().getShipFilePath() +
-                    "\nappendance: " + appendance +
-                    "\nmatch: " + match +
-                    "\nstack trace: " + e);
-        }
+        if (lastDot == -1)
+            return spriteName + appendance;
+        else
+            return spriteName.substring(0, lastDot) + appendance + spriteName.substring(lastDot);
     }
 
     private static String getGlow1SpritePath(ShipAPI ship) {
