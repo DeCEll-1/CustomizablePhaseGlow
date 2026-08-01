@@ -9,7 +9,6 @@ import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.combat.entities.Ship;
-import com.fs.starfarer.coreui.refit.U;
 
 import java.util.Objects;
 
