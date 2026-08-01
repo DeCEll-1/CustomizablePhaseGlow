@@ -2,6 +2,7 @@ package DeCell.CPG.Plugins;
 
 import DeCell.CPG.Frontend.Backend.Components.MyPanel;
 import DeCell.CPG.Frontend.MainRefitPanelPlugin;
+import DeCell.CPG.Reflection.Reflections;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
@@ -29,8 +30,8 @@ public class CustomBanel implements EveryFrameScript {
         }
 
         UIPanelAPI refitTab = (UIPanelAPI) getCurrentTab();
-        U refitPanel = getRefitPanel();
-        Ship ship = refitPanel.getShipDisplay().getShip();
+        Object refitPanel = getRefitPanel();
+        Ship ship = (Ship) Reflections.invokeMethod("getShip", Reflections.invokeMethod("getShipDisplay", refitPanel));
         boolean isPhaseShip = ship.getHullSpec().isPhase(); // it is FPG because the mod was named FPG and not CPG before
         boolean hasHullmod = ship.getVariant().hasHullMod("FPG_NoPhaseGlow");
         String tmpShipID = ship.getId();

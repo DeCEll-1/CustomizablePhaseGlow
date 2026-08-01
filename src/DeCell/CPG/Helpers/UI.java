@@ -7,8 +7,8 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import static DeCell.CPG.Reflection.Reflections.invokeMethod;
 
 public class UI {
-    public static com.fs.starfarer.coreui.refit.U getRefitPanel() {
-        return (com.fs.starfarer.coreui.refit.U) invokeMethod("getRefitPanel", getCurrentTab());
+    public static Object getRefitPanel() {
+        return invokeMethod("getRefitPanel", getCurrentTab());
     }
 
     public static Object getCurrentTab() {
