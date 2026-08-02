@@ -196,5 +196,11 @@
     "ReleaseTag": "1.0.5",
     "PublishedAt": "2026-07-09T19:27:46Z",
     "TotalDownloads": 127
+  },
+  {
+    "SnapshotDate": "2026-08-02T03:31:45Z",
+    "ReleaseTag": "1.0.7",
+    "PublishedAt": "2026-08-01T17:22:55Z",
+    "TotalDownloads": 133
   }
 ]
