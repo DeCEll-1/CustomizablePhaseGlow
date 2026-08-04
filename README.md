@@ -5,7 +5,9 @@
 
 Customizable Phase Glow (CPG) is a small mod that lets you change and customize the phase glow effects on phase ships. It adds an in-game UI in the refit screen so you can pick from multiple glow presets and tweak visual parameters per-ship
 
-See forum post for detailed information: TODO
+See forum post for detailed information: https://fractalsoftworks.com/forum/index.php?topic=35653.msg523767
+
+![Image](./Promotional/output.webp)
 
 ## Installation
 
