@@ -6,7 +6,6 @@ import DeCell.CPG.Misc;
 import DeCell.CPG.Reflection.Reflections;
 import DeCell.CPG.Shader;
 import com.fs.graphics.Sprite;
-import com.fs.graphics.util.B;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.ShipAPI;

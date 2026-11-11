@@ -4,7 +4,7 @@
   "author": "DeCell",
   "totalConversion": "false",
   "description": "Customizable Phase Glow",
-  "gameVersion": "0.98a-RC5",
+  "gameVersion": "0.98.5a-RC3",
   "modPlugin": "DeCell.CPG.Plugins.ModPlugin",
   "jars": [
     "jars/CPG.jar"

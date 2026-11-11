@@ -66,6 +66,7 @@ public class MainRefitPanelPlugin extends PanelPlugin {
 
             ShaderJsonModel selectedShader = CustomizablePhaseGlow.getShaderForShip(_currShip);
 
+
             MyPanel lastSibling = null;
             assert selectedShader != null;
             for (ShaderUniformModel uniform : selectedShader.uniforms) {
